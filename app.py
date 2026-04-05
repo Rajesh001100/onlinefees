@@ -50,9 +50,7 @@ def create_app(config_class=Config):
     return app
 
 
-if __name__ == "__main__":
-    print("SMTP_USER =", os.getenv("SMTP_USER"))
-    print("SMTP_PASS loaded =", "YES" if os.getenv("SMTP_PASS") else "NO")
+app = create_app()
 
-    app = create_app()
+if __name__ == "__main__":
     app.run(debug=True)
