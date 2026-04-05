@@ -10,7 +10,11 @@ class Config:
     os.makedirs(INSTANCE_DIR, exist_ok=True)
 
     DATABASE_PATH = os.path.join(INSTANCE_DIR, "fees.db")
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", f"sqlite:///{DATABASE_PATH}")
+    _db_url = os.getenv("DATABASE_URL")
+    if _db_url and _db_url.startswith("postgres://"):
+        _db_url = _db_url.replace("postgres://", "postgresql://", 1)
+    
+    SQLALCHEMY_DATABASE_URI = _db_url or f"sqlite:///{DATABASE_PATH}"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Uploads (future: admin photo upload)
