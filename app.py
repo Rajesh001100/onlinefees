@@ -5,8 +5,14 @@ from flask_wtf.csrf import CSRFProtect
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 
+import logging
+
 # ✅ Load .env FIRST (before anything else)
 load_dotenv()
+
+# Configure logging for production troubleshooting
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 from config import Config
 from blueprints.student.routes import student_bp
