@@ -1,0 +1,223 @@
+{% extends "student/student_base.html" %}
+{% block student_content %}
+
+<style>
+  .premium-hero {
+    background: linear-gradient(135deg, #0A3772 0%, #1d4ed8 100%);
+    color: white;
+    position: relative;
+    overflow: hidden;
+  }
+  .premium-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    z-index: 1;
+  }
+  .stat-card {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  }
+  .stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.1) !important;
+  }
+  .animate-in {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .delay-1 { animation-delay: 0.1s; }
+  .delay-2 { animation-delay: 0.2s; }
+  .delay-3 { animation-delay: 0.3s; }
+  
+  @media (max-width: 768px) {
+    .hero-text { text-align: center; }
+    .hero-img-wrapper { display: none; }
+    .stat-grid { grid-template-columns: 1fr !important; }
+  }
+</style>
+
+<div class="row g-4">
+  <!-- Welcome Section -->
+  <div class="col-12 animate-in">
+    <div class="card premium-hero border-0 shadow-lg rounded-4">
+      <div class="card-body p-4 p-md-5">
+        <div class="row align-items-center">
+          <div class="col-md-8 hero-text">
+            <h1 class="fw-bold display-5 mb-2">Welcome, {{ student.name }}</h1>
+            <p class="opacity-75 fs-5 mb-4">{{ inst.full_name }} • {{ student.course }}</p>
+            <div class="d-flex flex-wrap gap-2 justify-content-center justify-content-md-start">
+              <span class="badge bg-white text-primary px-3 py-2 rounded-pill shadow-sm">
+                <i class="fa-solid fa-id-card me-1"></i> {{ student.admission_no }}
+              </span>
+              <span class="badge bg-white bg-opacity-20 px-3 py-2 rounded-pill">
+                <i class="fa-solid fa-graduation-cap me-1"></i> Year {{ student.year }}
+              </span>
+            </div>
+          </div>
+          {% if photo_url %}
+          <div class="col-md-4 text-center hero-img-wrapper">
+             <div class="position-relative d-inline-block">
+               <div class="position-absolute top-50 start-50 translate-middle rounded-circle bg-white opacity-25" 
+                    style="width: 180px; height: 180px; filter: blur(25px);"></div>
+               <img src="{{ photo_url }}" class="rounded-circle border border-4 border-white shadow-lg position-relative" 
+                    style="width: 150px; height: 150px; object-fit: cover; z-index: 2;" 
+                    alt="Student Photo">
+             </div>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% if student.quota_type == '7.5 RESERVATION' %}
+  <div class="col-12 animate-in delay-1">
+    <div class="alert alert-primary border-0 shadow-sm rounded-4 d-flex align-items-center gap-3 p-4 mb-0" 
+         style="background: rgba(13, 110, 253, 0.05); border: 1px solid rgba(13, 110, 253, 0.1) !important;">
+        <div class="rounded-circle bg-primary text-white p-3 shadow-sm">
+            <i class="fa-solid fa-award fa-xl"></i>
+        </div>
+        <div>
+            <h5 class="fw-bold mb-1 text-primary">Government 7.5% Scholarship</h5>
+            <p class="mb-0 text-muted small">Academic and hostel fees are covered. Any additional dues like library or exam fees will be listed below.</p>
+        </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Quick Stats Grid -->
+  <div class="col-12 animate-in delay-1">
+    <div class="row g-3">
+      <div class="col-md-4">
+        <div class="card glass stat-card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between mb-3">
+              <div class="rounded-pill bg-primary bg-opacity-10 text-primary px-3 py-1 small fw-bold">Total Fees</div>
+              <div class="text-primary"><i class="fa-solid fa-wallet fs-4"></i></div>
+            </div>
+            <h2 class="fw-bold mb-1">₹{{ "{:,}".format(fee_state.net_total) }}</h2>
+            <p class="text-muted small mb-0">Total assigned for current term</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card glass stat-card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between mb-3">
+              <div class="rounded-pill bg-success bg-opacity-10 text-success px-3 py-1 small fw-bold">Amount Paid</div>
+              <div class="text-success"><i class="fa-solid fa-circle-check fs-4"></i></div>
+            </div>
+            <h2 class="fw-bold mb-1">₹{{ "{:,}".format(fee_state.paid_total) }}</h2>
+            <div class="progress mb-2" style="height: 6px;">
+              {% set progress = (fee_state.paid_total / fee_state.net_total * 100)|round|int if fee_state.net_total > 0 else 100 %}
+              <div class="progress-bar bg-success" style="--progress-width: {{ progress }}%; width: var(--progress-width);"></div>
+            </div>
+            <p class="text-muted small mb-0">{{ progress }}% of total cleared</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card glass stat-card border-0 shadow-sm rounded-4 h-100">
+          <div class="card-body p-4">
+            <div class="d-flex justify-content-between mb-3">
+              <div class="rounded-pill bg-danger bg-opacity-10 text-danger px-3 py-1 small fw-bold">Outstanding Due</div>
+              <div class="text-danger"><i class="fa-solid fa-clock-rotate-left fs-4"></i></div>
+            </div>
+            <h2 class="fw-bold mb-1 text-danger">₹{{ "{:,}".format(fee_state.due_total) }}</h2>
+            <p class="text-muted small mb-0">Action required for pending dues</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Actions & Recent Activity -->
+  <div class="col-lg-8 animate-in delay-2">
+    <div class="card glass border-0 shadow-sm rounded-4 mb-4">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-4">
+          <h5 class="fw-bold mb-0">Payment Summary</h5>
+          <a href="{{ url_for('student.fees') }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">View Details</a>
+        </div>
+        
+        <div class="p-4 rounded-4 bg-light bg-opacity-50 border border-white text-center mb-0">
+          {% if fee_state.due_total > 0 %}
+            <div class="mb-4">
+              <div class="display-4 fw-bold text-danger mb-1">₹{{ "{:,}".format(fee_state.current_due_total) }}</div>
+              <p class="text-muted">Currently Overdue Amount</p>
+            </div>
+            <div class="d-grid gap-2">
+              <a href="{{ url_for('student.fees') }}" class="btn btn-primary btn-lg rounded-pill shadow-sm py-3 fw-bold">
+                <i class="fa-solid fa-bolt me-2"></i> Make Immediate Payment
+              </a>
+            </div>
+          {% else %}
+            <div class="py-4">
+              <div class="rounded-circle bg-success text-white p-4 d-inline-flex mb-4 shadow-sm">
+                <i class="fa-solid fa-check fs-1"></i>
+              </div>
+              <h3 class="fw-bold text-success mb-2">Great news! You're all clear.</h3>
+              <p class="text-muted mb-4">No outstanding dues found for the current period.</p>
+              <a href="{{ url_for('student.fees') }}" class="btn btn-outline-primary rounded-pill px-5 py-2">
+                View History / Advance Pay
+              </a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4 animate-in delay-3">
+    <div class="card glass border-0 shadow-sm rounded-4 mb-4 h-100">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-4">Shortcuts</h5>
+        <div class="d-grid gap-3">
+          <a href="{{ url_for('student.fees') }}" class="btn btn-white border shadow-sm rounded-4 p-3 text-start hover-lift">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 bg-primary bg-opacity-10 text-primary rounded-3">
+                <i class="fa-solid fa-receipt fs-5 fa-fw"></i>
+              </div>
+              <div>
+                <div class="fw-bold d-block text-dark">Fee Breakdown</div>
+                <div class="text-muted small">View items & structure</div>
+              </div>
+            </div>
+          </a>
+          <a href="{{ url_for('student.fees') }}#history" class="btn btn-white border shadow-sm rounded-4 p-3 text-start hover-lift">
+            <div class="d-flex align-items-center gap-3">
+              <div class="p-2 bg-success bg-opacity-10 text-success rounded-3">
+                <i class="fa-solid fa-history fs-5 fa-fw"></i>
+              </div>
+              <div>
+                <div class="fw-bold d-block text-dark">Recent Receipt</div>
+                <div class="text-muted small">Download legacy payments</div>
+              </div>
+            </div>
+          </a>
+          <div class="mt-auto pt-4">
+            <div class="p-4 rounded-4 bg-primary bg-opacity-10 text-primary position-relative overflow-hidden">
+              <h6 class="fw-bold mb-2">Support Portal</h6>
+              <p class="small mb-0 opacity-75">Facing any technical issue during payment?</p>
+              <a href="#" class="btn btn-primary btn-sm rounded-pill mt-3 px-4 shadow-sm">Contact Support</a>
+              <i class="fa-solid fa-headset position-absolute end-0 bottom-0 mb-n3 me-n2 opacity-10 fs-1"></i>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

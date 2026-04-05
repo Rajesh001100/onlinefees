@@ -1,0 +1,127 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="fw-bold mb-0">Fee Plans (Courses)</h2>
+        <p class="text-muted">Manage courses and their base fee structures.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- ADD FORM -->
+    <div class="col-md-4">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 fw-bold">Add New Fee Plan</div>
+            <div class="card-body">
+                <form action="{{ url_for('admin.add_fee_plan') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">COURSE NAME</label>
+                        <input type="text" name="course" class="form-control" placeholder="e.g. B.E. CSE" required
+                            list="course_list">
+                        <datalist id="course_list">
+                            {% for c in distinct_courses %}
+                            <option value="{{ c }}">
+                                {% endfor %}
+                        </datalist>
+                        <div class="form-text small">Type a new name to create a new course.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">YEAR</label>
+                        <select name="year" class="form-select" required>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TUITION FEE</label>
+                        <input type="number" name="tuition" class="form-control" placeholder="₹" min="0" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <label class="form-label small fw-bold text-muted">EXAM FEE</label>
+                            <input type="number" name="exam" class="form-control" placeholder="₹" min="0" value="0">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">HOSTEL FEE</label>
+                        <input type="number" name="hostel" class="form-control" placeholder="₹" min="0" value="50000">
+                    </div>
+
+                    <button class="btn btn-primary w-100">Add Fee Plan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="col-md-8">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Course</th>
+                                <th>Year</th>
+                                <th>Tuition</th>
+                                <th>Hostel</th>
+                                <th>Exam</th>
+                                <th>Total</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for p in plans %}
+                            <tr>
+                                <td class="ps-4 fw-bold">{{ p.course }}</td>
+                                <td>Year {{ p.year }}</td>
+                                <td>₹{{ p.tuition }}</td>
+                                <td>₹{{ p.hostel }}</td>
+                                <td>₹{{ p.exam }}</td>
+                                <td class="fw-bold">₹{{ p.tuition + p.hostel + p.exam }}</td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex gap-2 justify-content-end align-items-center">
+                                        <!-- Edit Button (Link) -->
+                                        <a href="{{ url_for('admin.edit_fee_plan', id=p.id) }}"
+                                            class="btn btn-primary btn-sm shadow-sm px-3 text-decoration-none"
+                                            title="Edit Fee Plan"
+                                            style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                            <i class="bi bi-pencil-fill"></i> Edit
+                                        </a>
+
+                                        <!-- Delete Form -->
+                                        <form action="{{ url_for('admin.delete_fee_plan', id=p.id) }}" method="post"
+                                            class="d-inline" onsubmit="return confirm('Delete this fee plan?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="btn btn-danger btn-sm shadow-sm px-3" title="Delete Fee Plan"
+                                                style="display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                                                <i class="bi bi-trash-fill"></i> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="7" class="text-center py-5 text-muted">No fee plans found.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

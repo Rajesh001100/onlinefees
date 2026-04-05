@@ -1,0 +1,212 @@
+{% extends "student/student_base.html" %}
+{% block student_content %}
+
+<style>
+  .status-icon-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin: 0 auto 1.5rem;
+  }
+  .status-success { background: rgba(25, 135, 84, 0.1); color: #198754; }
+  .status-failed { background: rgba(220, 53, 69, 0.1); color: #dc3545; }
+  .status-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+  
+  .details-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 1rem;
+  }
+  @media (max-width: 576px) {
+    .details-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <div class="card glass border-0 shadow-lg rounded-4 overflow-hidden animate__animated animate__fadeIn">
+      <div class="card-body p-4 p-md-5 text-center">
+        
+        {% set p_status = (p.status|default('')|upper|trim) %}
+        
+        <!-- Status Header -->
+        <div class="mb-4">
+          {% if p_status == "SUCCESS" %}
+            <div class="status-icon-box status-success animate__animated animate__bounceIn">
+              <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <h2 class="fw-bold text-success mb-2">Payment Successful!</h2>
+            <p class="text-muted">Your transaction has been verified and recorded.</p>
+          {% elif p_status == "FAILED" %}
+            <div class="status-icon-box status-failed">
+              <i class="fa-solid fa-circle-xmark"></i>
+            </div>
+            <h2 class="fw-bold text-danger mb-2">Payment Failed</h2>
+            <p class="text-muted">Something went wrong with the transaction. Please try again.</p>
+          {% else %}
+            <div class="status-icon-box status-pending animate__animated animate__pulse animate__infinite">
+              <i class="fa-solid fa-clock"></i>
+            </div>
+            <h2 class="fw-bold text-warning mb-2">Payment Initiated</h2>
+            <p class="text-muted">Please complete the transaction in the secure gateway.</p>
+          {% endif %}
+        </div>
+
+        <!-- Transaction Details -->
+        <div class="details-grid text-start mb-4">
+          <div>
+            <div class="text-muted x-small text-uppercase fw-bold ls-1 mb-1">Transaction ID</div>
+            <div class="fw-bold text-dark font-monospace">{{ p.txn_id }}</div>
+          </div>
+          <div>
+            <div class="text-muted x-small text-uppercase fw-bold ls-1 mb-1">Amount</div>
+            <div class="fw-bold text-dark">₹{{ "{:,}".format((p.amount or 0)|int) }}</div>
+          </div>
+          <div>
+            <div class="text-muted x-small text-uppercase fw-bold ls-1 mb-1">Category</div>
+            <div class="fw-bold text-dark">{{ p.category }}</div>
+          </div>
+          <div>
+            <div class="text-muted x-small text-uppercase fw-bold ls-1 mb-1">Payment Method</div>
+            <div class="fw-bold text-dark">{{ p.method }}</div>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-grid gap-3">
+          {% if p_status == "INITIATED" %}
+            <button id="rzp-button1" class="btn btn-primary btn-lg rounded-pill py-3 shadow-lg border-0 fw-bold" 
+                    style="background: linear-gradient(135deg, #0A3772 0%, #1d4ed8 100%);">
+              <i class="fa-solid fa-credit-card me-2"></i> Launch Secure Gateway
+            </button>
+
+            {% if test_mode %}
+            <button id="test-success-btn" class="btn btn-outline-warning rounded-pill py-2 border-dashed fw-bold">
+              <i class="fa-solid fa-flask me-2"></i> (Test Mode) Simulate Success
+            </button>
+            {% endif %}
+          {% endif %}
+
+          <div class="row g-2">
+            {% if p_status == "SUCCESS" %}
+            <div class="col-12">
+                <a class="btn btn-success btn-lg rounded-pill py-3 w-100 fw-bold shadow-sm" href="{{ url_for('student.receipt_pdf', txn_id=p.txn_id) }}">
+                    <i class="fa-solid fa-file-invoice me-2"></i> Download PDF Receipt
+                </a>
+            </div>
+            {% endif %}
+            <div class="col-{% if p_status == 'SUCCESS' %}6{% else %}12{% endif %}">
+                <a class="btn btn-light border rounded-pill py-2 w-100 shadow-sm" href="{{ url_for('student.fees') }}">
+                    Detailed Fees
+                </a>
+            </div>
+            {% if p_status == "SUCCESS" %}
+            <div class="col-6">
+                <a class="btn btn-primary rounded-pill py-2 w-100 shadow-sm" href="{{ url_for('student.dashboard') }}">
+                    Dashboard
+                </a>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="mt-5 pt-3 border-top d-flex align-items-center justify-content-center gap-4 text-muted x-small">
+            <span><i class="fa-solid fa-shield-halved me-1 text-success"></i> 256-bit SSL</span>
+            <span><i class="fa-solid fa-lock me-1 text-primary"></i> PCI DSS Compliant</span>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if p_status == "INITIATED" %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  var options = {
+    "key": "{{ rzp_key_id }}",
+    "amount": "{{ rzp_amount_paise }}",
+    "currency": "INR",
+    "name": "JKKM Fees Portal",
+    "description": "Fee Payment: {{ p.category }}",
+    "order_id": "{{ p.razorpay_order_id }}",
+    "handler": function (response) {
+      fetch("{{ url_for('student.pay_verify') }}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({
+          razorpay_payment_id: response.razorpay_payment_id,
+          razorpay_order_id: response.razorpay_order_id,
+          razorpay_signature: response.razorpay_signature,
+          txn_id: "{{ p.txn_id }}"
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+          if (data.ok) {
+              window.location.href = "{{ url_for('student.pay_complete', txn_id=p.txn_id, result='SUCCESS') }}";
+          } else {
+              alert("Verification issue: " + data.msg);
+              window.location.reload();
+          }
+      });
+    },
+    "prefill": {
+      "name": "{{ student.name if student else '' }}",
+      "email": "{{ student.student_email if student else '' }}",
+      "contact": "{{ student.student_phone if student else '' }}"
+    },
+    "theme": { "color": "#0A3772" }
+  };
+  const rzp1 = new Razorpay(options);
+  const rzpBtn = document.getElementById('rzp-button1');
+
+  if (rzpBtn) {
+    rzpBtn.onclick = function (e) {
+      rzp1.open();
+      e.preventDefault();
+    };
+  }
+
+  // Suggest opening on load if nothing happened
+  document.addEventListener('DOMContentLoaded', () => {
+      setTimeout(() => { if (rzp1) rzp1.open(); }, 500);
+  });
+</script>
+
+{% if test_mode %}
+<script>
+  const testSuccessBtn = document.getElementById('test-success-btn');
+  if (testSuccessBtn) {
+    testSuccessBtn.onclick = function () {
+      if (!confirm("Confirm test-mode success simulation?")) return;
+      fetch("{{ url_for('student.pay_test_verify') }}", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": "{{ csrf_token() }}"
+        },
+        body: JSON.stringify({ txn_id: "{{ p.txn_id }}" })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.ok) window.location.href = "{{ url_for('student.pay_complete', txn_id=p.txn_id, result='SUCCESS') }}";
+        else alert("Mock error: " + data.msg);
+      });
+    };
+  }
+</script>
+{% endif %}
+{% endif %}
+
+{% endblock %}

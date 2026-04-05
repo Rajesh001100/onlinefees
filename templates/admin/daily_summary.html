@@ -1,0 +1,122 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div>
+      <h4 class="fw-bold mb-0">Daily Fees Summary</h4>
+      <div class="text-muted small">Payments (SUCCESS) for selected day.</div>
+    </div>
+
+    <form class="d-flex gap-2" method="GET">
+      <input type="date" name="day" value="{{ day }}" class="form-control rounded-4">
+      <input type="text" name="q" value="{{ q }}" placeholder="Search admission / name" class="form-control rounded-4">
+      <button class="btn btn-primary rounded-4">Search</button>
+    </form>
+  </div>
+
+  <div class="row g-3">
+    <!-- Grand total -->
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="text-muted small">Grand Total</div>
+          <div class="fs-3 fw-bold">₹{{ "{:,}".format(grand_total|int) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Totals by category -->
+    <div class="col-md-8">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="fw-semibold mb-2">Totals by Category</div>
+          <div class="table-responsive">
+            <table class="table mb-0">
+              <thead class="table-light">
+                <tr><th>Category</th><th class="text-end">Amount</th></tr>
+              </thead>
+              <tbody>
+                {% for r in totals %}
+                  <tr>
+                    <td>{{ r.category }}</td>
+                    <td class="text-end fw-semibold">₹{{ "{:,}".format((r.total or 0)|int) }}</td>
+                  </tr>
+                {% else %}
+                  <tr><td colspan="2" class="text-center text-muted py-3">No payments</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ✅ NEW: Cash vs Online -->
+    <div class="col-12">
+      <div class="card border-0 shadow-sm rounded-4">
+        <div class="card-body p-4">
+          <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
+            <div>
+              <div class="text-muted small">Cash Counter</div>
+              <div class="fs-4 fw-bold">₹{{ "{:,}".format((cash_total or 0)|int) }}</div>
+            </div>
+            <div class="text-end">
+              <div class="text-muted small">Online</div>
+              <div class="fs-4 fw-bold">₹{{ "{:,}".format((online_total or 0)|int) }}</div>
+            </div>
+          </div>
+          <div class="text-muted small mt-2">
+            Online = any payment method except <b>CASH_COUNTER</b>.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Transactions -->
+  <div class="card border-0 shadow-sm rounded-4 mt-3">
+    <div class="card-body p-4">
+      <div class="fw-semibold mb-2">Transactions</div>
+      <div class="table-responsive">
+        <table class="table mb-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Time</th>
+              <th>Admission</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Method</th>
+              <th class="text-end">Amount</th>
+              <th class="text-muted">Txn</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for r in tx %}
+              <tr>
+                <td class="text-muted small">{{ r.created_at }}</td>
+                <td class="fw-semibold">{{ r.admission_no }}</td>
+                <td>{{ r.name }}</td>
+                <td><span class="badge text-bg-light border">{{ r.category }}</span></td>
+                <td>
+                  {% if r.method == "CASH_COUNTER" %}
+                    <span class="badge text-bg-success">CASH</span>
+                  {% else %}
+                    <span class="badge text-bg-primary">ONLINE</span>
+                  {% endif %}
+                  <span class="text-muted small ms-1">{{ r.method }}</span>
+                </td>
+                <td class="text-end fw-semibold">₹{{ "{:,}".format((r.amount or 0)|int) }}</td>
+                <td class="text-muted small">{{ r.txn_id or "-" }}</td>
+              </tr>
+            {% else %}
+              <tr><td colspan="7" class="text-center text-muted py-4">No transactions</td></tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

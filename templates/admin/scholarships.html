@@ -1,0 +1,168 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row g-4 animate__animated animate__fadeIn">
+    <div class="col-12">
+        <div class="card premium-hero border-0 shadow-lg rounded-4 overflow-hidden mb-4">
+            <div class="card-body p-4 p-md-5">
+                <div class="row align-items-center">
+                    <div class="col-lg-8">
+                        <div class="d-flex align-items-center gap-3 mb-3">
+                            <div class="rounded-circle bg-white bg-opacity-20 p-3">
+                                <i class="fa-solid fa-hand-holding-dollar fa-3x"></i>
+                            </div>
+                            <div>
+                                <h1 class="fw-bold mb-0">Scholarship Management</h1>
+                                <p class="opacity-75 mb-0 fs-5">Manage and configure available scholarship categories</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 text-lg-end">
+                        <button class="btn btn-light rounded-pill px-4 fw-bold text-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#addScholarshipModal">
+                            <i class="fa-solid fa-plus me-2"></i>Add Scholarship Type
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="card glass border-0 shadow-sm rounded-4 overflow-hidden">
+            <div class="bg-primary bg-opacity-10 py-3 px-4 border-bottom">
+                <h5 class="fw-bold mb-0 text-primary">Active Scholarships</h5>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr class="text-primary fw-bold">
+                                <th class="border-0 p-3 ps-4">Scholarship Type</th>
+                                <th class="border-0 p-3">Amount</th>
+                                <th class="border-0 p-3">Added Date</th>
+                                <th class="border-0 p-3 text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if scholarships %}
+                                {% for s in scholarships %}
+                                <tr>
+                                    <td class="ps-4">
+                                        <div class="fw-bold fs-5 text-dark">{{ s.scholarship_type }}</div>
+                                        <small class="text-muted">Applied to students matching this category</small>
+                                    </td>
+                                    <td class="fw-bold fs-5 text-primary">₹{{ "{:,}".format(s.amount) }}</td>
+                                    <td class="text-muted small">{{ s.created_at.strftime('%Y-%m-%d') }}</td>
+                                    <td class="text-end pe-4">
+                                        <div class="d-flex gap-2 justify-content-end">
+                                            <button class="btn btn-outline-primary btn-sm rounded-pill px-3" 
+                                                    data-bs-toggle="modal" 
+                                                    data-bs-target="#editScholarshipModal{{ s.id }}">
+                                                <i class="fa-solid fa-pen me-1"></i> Edit
+                                            </button>
+                                            <form method="POST" action="{{ url_for('admin.delete_scholarship', id=s.id) }}" 
+                                                  onsubmit="return confirm('Delete this scholarship category? Warning: This will remove the benefit from student settings.')"
+                                                  class="d-inline">
+                                                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                                <button type="submit" class="btn btn-outline-danger btn-sm rounded-pill px-3">
+                                                    <i class="fa-solid fa-trash me-1"></i> Remove
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5 text-muted">
+                                        No scholarship categories found. Click "Add Scholarship Type" to create one.
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% for s in scholarships %}
+<!-- Edit Modal -->
+<div class="modal fade" id="editScholarshipModal{{ s.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg text-dark">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold">Edit Scholarship: {{ s.scholarship_type }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.edit_scholarship', id=s.id) }}">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TYPE NAME (e.g., SC, ST, MBC)</label>
+                        <input type="text" name="scholarship_type" class="form-control rounded-3" value="{{ s.scholarship_type }}" required>
+                    </div>
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold text-muted">FIXED AMOUNT (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0">₹</span>
+                            <input type="number" name="amount" class="form-control border-start-0 rounded-end-3" value="{{ s.amount }}" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+<!-- Add Scholarship Modal -->
+<div class="modal fade" id="addScholarshipModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-header bg-primary text-white border-0 py-3">
+                <h5 class="modal-title fw-bold">Create New Scholarship Category</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="POST" action="{{ url_for('admin.add_scholarship') }}">
+                <div class="modal-body p-4">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">TYPE NAME (e.g., PH, MERIT, SPORTS)</label>
+                        <input type="text" name="scholarship_type" class="form-control rounded-3" placeholder="SCHOLARSHIP NAME" required>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label small fw-bold text-muted">FIXED AMOUNT (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-end-0 text-muted">₹</span>
+                            <input type="number" name="amount" class="form-control border-start-0 ps-0 rounded-end-3" placeholder="10000" required>
+                        </div>
+                        <small class="text-muted mt-2 d-block">This amount will be automatically deducted from the tuition fee for eligible students.</small>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 p-4 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Create Scholarship</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    .premium-hero {
+        background: linear-gradient(135deg, #4158D0 0%, #C850C0 46%, #FFCC70 100%);
+        color: white;
+    }
+    .table-hover tbody tr:hover {
+        background-color: rgba(65, 88, 208, 0.03);
+    }
+</style>
+{% endblock %}

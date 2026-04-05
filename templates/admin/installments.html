@@ -1,0 +1,132 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row mb-4 align-items-center">
+    <div class="col">
+        <h2 class="fw-bold mb-0">Fee Installments</h2>
+        <p class="text-muted">Configure payment schedules and late fees.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- ADD FORM -->
+    <div class="col-md-4">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-header bg-transparent border-0 fw-bold">Add New Schedule</div>
+            <div class="card-body">
+                <form action="{{ url_for('admin.add_installment') }}" method="post">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">COURSE</label>
+                        <select name="course" class="form-select" required>
+                            <option value="" disabled selected>Select Course</option>
+                            {% for c in courses %}
+                            <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">YEAR</label>
+                        <select name="year" class="form-select" required>
+                            <option value="1">1st Year</option>
+                            <option value="2">2nd Year</option>
+                            <option value="3">3rd Year</option>
+                            <option value="4">4th Year</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">LABEL</label>
+                        <input type="text" name="label" class="form-control" placeholder="e.g. Semester 1" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">DUE DATE</label>
+                        <input type="date" name="due_date" class="form-control" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col">
+                            <label class="form-label small fw-bold text-muted">% OF FEE</label>
+                            <input type="number" name="percentage" class="form-control" placeholder="50" min="1"
+                                max="100" required>
+                        </div>
+                        <div class="col">
+                            <label class="form-label small fw-bold text-muted">LATE FEE/DAY</label>
+                            <input type="number" name="late_fee" class="form-control" placeholder="Agreed ₹" min="0"
+                                value="0" required>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-100">Add Installment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- LIST -->
+    <div class="col-md-8">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light">
+                            <tr>
+                                <th class="ps-4">Course / Year</th>
+                                <th>Label</th>
+                                <th>Due Date</th>
+                                <th>%</th>
+                                <th>Late Fee</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for i in installments %}
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="fw-bold">{{ i.course }}</div>
+                                    <div class="small text-muted">Year {{ i.year }}</div>
+                                </td>
+                                <td>{{ i.label }}</td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">{{ i.due_date }}</span>
+                                </td>
+                                <td>{{ i.percentage }}%</td>
+                                <td>
+                                    {% if i.late_fee_per_day > 0 %}
+                                    <span class="text-danger fw-bold">₹{{ i.late_fee_per_day }}/day</span>
+                                    {% else %}
+                                    <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="{{ url_for('admin.edit_installment', id=i.id) }}"
+                                            class="btn btn-sm btn-light text-primary fw-bold border">
+                                            <i class="bi bi-pencil me-1"></i>EDIT
+                                        </a>
+                                        <form action="{{ url_for('admin.delete_installment', id=i.id) }}" method="post"
+                                            onsubmit="return confirm('Remove this schedule?');">
+                                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                            <button class="btn btn-sm btn-light text-danger fw-bold border">
+                                                <i class="bi bi-trash me-1"></i>REMOVE
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5 text-muted">No installments configured yet.</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

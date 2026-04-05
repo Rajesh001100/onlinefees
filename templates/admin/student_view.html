@@ -1,0 +1,446 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+
+{# --- SAFE DEFAULTS --- #}
+{% set fs = fee_state if fee_state is defined else None %}
+{% set ok = (fs and fs.ok) %}
+{% set total_amt = (fs.net_total if ok else 0) %}
+{% set paid_amt = (fs.paid_total if ok else 0) %}
+{% set due_amt = (fs.due_total if ok else 0) %}
+{% set due_map = (fs.due if ok else {}) %}
+
+<!-- Premium Student Hero -->
+<div class="card premium-hero shadow-lg mb-4 rounded-4 overflow-hidden border-0">
+  <div class="card-body p-4 p-lg-5">
+    <div class="row align-items-center">
+      <div class="col-lg-8">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="rounded-circle bg-white bg-opacity-20 p-3">
+            <i class="fa-solid fa-user-graduate fa-3x"></i>
+          </div>
+          <div>
+            <h2 class="fw-bold mb-0">{{ student.name }}</h2>
+            <div class="opacity-75">
+              {{ inst.full_name }} • <strong>{{ student.admission_no }}</strong>
+              {% if student.register_no %} • Reg: {{ student.register_no }}{% endif %}
+            </div>
+          </div>
+        </div>
+        <div class="d-flex gap-2 flex-wrap">
+          {% if student.is_active == 1 %}
+          <span class="badge badge-premium bg-white text-primary">Active Student</span>
+          {% else %}
+          <span class="badge badge-premium bg-secondary text-white">Inactive</span>
+          {% endif %}
+          <span class="badge badge-premium bg-white bg-opacity-20">{{ student.class }}</span>
+          <span class="badge badge-premium bg-white bg-opacity-20">Year {{ student.year }}</span>
+        </div>
+      </div>
+      <div class="col-lg-4 mt-4 mt-lg-0 text-lg-end">
+        <div class="d-flex flex-column gap-2">
+            <a href="{{ url_for('admin.edit_student', student_id=student.id) }}"
+               class="btn btn-light rounded-pill px-4 fw-bold text-primary">
+               <i class="fa-solid fa-pen-to-square me-2"></i>Edit Profile
+            </a>
+            <div class="d-flex gap-2 justify-content-lg-end">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-light rounded-pill px-3 btn-sm">
+                    <i class="fa-solid fa-arrow-left me-1"></i> Dashboard
+                </a>
+                {% if student.is_active == 1 %}
+                <form method="POST" action="{{ url_for('admin.remove_student', student_id=student.id) }}" class="d-inline">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-outline-light rounded-pill px-3 btn-sm" onclick="return confirm('Disable this student?')">Remove</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+
+  <!-- Left column -->
+  <div class="col-md-4">
+
+    <!-- Profile card -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4 text-center">
+        <div class="fw-bold fs-5">{{ student.name }}</div>
+        <div class="text-muted small">{{ student.class }} • {{ student.year }}-Year</div>
+        
+        <!-- 🤖 AI Risk Score Badge -->
+        <div id="riskScoreContainer" class="mt-3 d-none" data-student-id="{{ student.id }}">
+            <div id="riskBadge" class="badge rounded-pill px-3 py-2 fs-6 shadow-sm" data-bs-toggle="tooltip" data-bs-html="true" title="">
+                <span id="riskEmoji"></span> Risk: <span id="riskLevel">Loading...</span>
+            </div>
+            <div id="riskScoreValue" class="text-muted x-small mt-1" style="font-size: 0.7rem;"></div>
+        </div>
+        
+        <div class="text-muted small mt-2">Reg No: {{ student.register_no or "-" }}</div>
+      </div>
+    </div>
+
+    <!-- Fee summary -->
+    <div class="card glass border-0 shadow-sm rounded-4 mt-3 overflow-hidden">
+        <div class="bg-primary bg-opacity-10 py-3 px-4 border-bottom">
+            <h6 class="fw-bold mb-0 text-primary">Financial Overview</h6>
+        </div>
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between mb-2">
+          <span class="text-muted">Total Payable</span>
+          <span class="fw-bold">₹{{ "{:,}".format(total_amt|int) }}</span>
+        </div>
+        
+        <!-- Progress Bar -->
+        {% set progress = (paid_amt / total_amt * 100) if total_amt > 0 else 0 %}
+        <div class="progress rounded-pill mb-4" style="height: 10px;">
+          <div class="progress-bar bg-primary" role="progressbar" data-progress="{{ progress }}" style="width: 0%"></div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-2">
+          <span class="text-muted">Amount Paid</span>
+          <span class="fw-bold text-success">₹{{ "{:,}".format(paid_amt|int) }}</span>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <span class="text-muted">Outstanding</span>
+          <span class="fw-bold text-danger">₹{{ "{:,}".format(due_amt|int) }}</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Right column -->
+  <div class="col-md-8">
+
+    <!-- Contact -->
+    <div class="card border-0 shadow-sm rounded-4">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Contact</h5>
+        <div class="row g-2 small">
+          <div class="col-6 text-muted">Student Phone</div>
+          <div class="col-6 fw-semibold text-end">{{ student.student_phone or "-" }}</div>
+
+          <div class="col-6 text-muted">Parent Phone</div>
+          <div class="col-6 fw-semibold text-end">{{ student.parent_phone or "-" }}</div>
+
+          <div class="col-6 text-muted d-flex align-items-center">
+            WhatsApp
+          </div>
+          <div class="col-6 text-end">
+            <form method="POST" action="{{ url_for('admin.send_whatsapp_student', student_id=student.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-success btn-sm rounded-pill px-3 py-1" style="font-size: 0.75rem;">
+                <i class="fa-brands fa-whatsapp me-1"></i> Send Reminder
+              </button>
+            </form>
+          </div>
+
+          <div class="col-6 text-muted border-top pt-2">Student Email</div>
+          <div class="col-6 fw-semibold text-end border-top pt-2">{{ student.student_email or "-" }}</div>
+
+          <div class="col-6 text-muted">Parent Email</div>
+          <div class="col-6 fw-semibold text-end">{{ student.parent_email or "-" }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Fine -->
+    <form class="row g-2 mt-3" method="POST" action="{{ url_for('admin.add_fine', student_id=student.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="col-md-6">
+        <input class="form-control rounded-4" name="fine_label" placeholder="Fine reason" required>
+      </div>
+      <div class="col-md-3">
+        <input class="form-control rounded-4" name="fine_amount" type="number" min="1" placeholder="Amount" required>
+      </div>
+      <div class="col-md-3 d-grid">
+        <button class="btn btn-outline-danger rounded-4">Add Fine</button>
+      </div>
+    </form>
+
+    <!-- ✅ Fines box (THIS is what you were missing) -->
+    <div class="card border-0 shadow-sm rounded-4 mt-3">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-center">
+          <h5 class="fw-bold mb-0">Fines</h5>
+          <div class="text-muted small">Payable under category <b>FINE</b></div>
+        </div>
+
+        {% if fine_rows and fine_rows|length > 0 %}
+        <div class="table-responsive mt-3">
+          <table class="table align-middle mb-0">
+            <thead class="text-muted small">
+              <tr>
+                <th>Reason</th>
+                <th class="text-end">Amount</th>
+                <th class="text-end">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for f in fine_rows %}
+              <tr>
+                <td class="fw-semibold">{{ f.label }}</td>
+                <td class="text-end">₹{{ "{:,}".format((f.amount or 0)|int) }}</td>
+                <td class="text-end text-muted small">{{ f.created_at }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-muted mt-2">No fines added.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✅ Detailed Fee Summary (Replicated from Student Portal) -->
+    <div class="card border-0 shadow-sm rounded-4 mt-3">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h5 class="fw-bold mb-0">Detailed Fee Summary</h5>
+          {% if ok and due_amt|int == 0 %}
+          <span class="badge text-bg-success rounded-pill px-3 py-2">No Due</span>
+          {% endif %}
+        </div>
+
+        {% if full_state and full_state.ok %}
+        <div class="accordion shadow-sm" id="feeAccordion">
+          {% for y in full_state.years %}
+          {% set locked_cls = "text-muted bg-light" if y.is_locked else "" %}
+          <div class="accordion-item border-0 mb-2 rounded-3 overflow-hidden">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button {% if not y.is_current or y.is_locked %}collapsed{% endif %} {% if y.status == 'PAID' %}bg-success-subtle text-success{% endif %} {{ locked_cls }}"
+                type="button" {% if not y.is_locked %} data-bs-toggle="collapse"
+                data-bs-target="#collapseYear{{ y.year }}" {% else %} disabled {% endif %}>
+                <div class="d-flex w-100 justify-content-between align-items-center me-3">
+                  <span class="fw-bold">
+                    <i class="fa-solid fa-calendar-check me-2"></i> Year {{ y.year }}
+                    {% if y.is_locked %}
+                    <span class="badge bg-secondary text-white ms-2" style="font-size:0.7rem;">Locked</span>
+                    {% endif %}
+                  </span>
+                  <div class="d-flex gap-3 text-muted small">
+                    <span>Total: ₹{{ y.total }}</span>
+                    {% if y.status == 'PAID' %}
+                    <span class="badge bg-success">Paid</span>
+                    {% elif y.is_locked %}
+                    <span class="text-secondary"><i class="fa-solid fa-lock"></i> Complete Prev Year</span>
+                    {% else %}
+                    <span>Paid: <span class="text-success">₹{{ y.paid }}</span></span>
+                    <span>Due: <span class="text-danger fw-bold">₹{{ y.due }}</span></span>
+                    {% endif %}
+                  </div>
+                </div>
+              </button>
+            </h2>
+            <div id="collapseYear{{ y.year }}"
+              class="accordion-collapse collapse {% if y.is_current and not y.is_locked %}show{% endif %}"
+              data-bs-parent="#feeAccordion">
+              <div class="accordion-body bg-light">
+                {% if not y.active %}
+                <div class="text-muted fst-italic">{{ y.msg }}</div>
+                {% else %}
+                <div class="list-group list-group-flush rounded-3">
+                  {% for item in y.fee_items %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center bg-white px-3 py-3">
+                    <div>
+                      <div class="fw-semibold">
+                        {{ item.label }}
+                        {% if item.type == 'EXTRA' %}
+                        <span class="badge bg-info text-dark ms-1" style="font-size:0.65rem;">Add-on</span>
+                        {% endif %}
+                      </div>
+                      <div class="small text-muted">Fee Portion: ₹{{ item.amount }}</div>
+                    </div>
+
+                    <div class="text-end">
+                      {% if item.locked %}
+                      <span class="badge bg-success rounded-pill mb-1">Paid</span>
+                      <div class="small text-success fw-bold">₹{{ item.paid }}</div>
+                      {% else %}
+                      {% if item.paid > 0 %}
+                      <span class="badge bg-warning text-dark rounded-pill mb-1">Partial</span>
+                      {% else %}
+                      <span class="badge bg-danger rounded-pill mb-1">Unpaid</span>
+                      {% endif %}
+                      <div class="small text-muted mb-1">Due: ₹{{ item.amount - item.paid }}</div>
+                      
+                      <button type="button" class="btn btn-sm btn-success rounded-pill px-3"
+                        data-category="{{ item.category }}"
+                        data-label="{{ item.label }}"
+                        data-due="{{ item.amount - item.paid }}"
+                        onclick="showCashModal(this.getAttribute('data-category'), this.getAttribute('data-label'), this.getAttribute('data-due'))">
+                        Record Cash
+                      </button>
+                      {% endif %}
+                    </div>
+                  </div>
+                  {% endfor %}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-muted">Detailed fee summary not available.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- ✅ Modal for Cash Payment -->
+    <div class="modal fade" id="cashPayModal" tabindex="-1" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow">
+          <div class="modal-header border-0 pb-0">
+            <h5 class="modal-title fw-bold" id="modalTitle">Record Cash Payment</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <form method="post" action="{{ url_for('admin.admin_cash_pay', student_id=student.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="category" id="modalCategory">
+            <div class="modal-body p-4">
+              <div class="mb-3">
+                <label class="form-label text-muted small">Fee Item</label>
+                <div id="modalLabelDisplay" class="h6 fw-bold"></div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label fw-semibold">Amount to record (₹)</label>
+                <input type="number" name="cash_amount" id="modalAmount" class="form-control form-control-lg rounded-4" min="1" required>
+                <div class="text-muted small mt-1">Recommended: <span id="modalDueHint"></span></div>
+              </div>
+              <div class="alert alert-light border rounded-4 py-2 small mb-0">
+                <i class="fa-solid fa-info-circle me-1"></i> Recorded as <b>SUCCESS</b> with method <b>CASH_COUNTER</b>.
+              </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+              <button type="button" class="btn btn-outline-secondary rounded-4 px-4" data-bs-dismiss="modal">Cancel</button>
+              <button type="submit" class="btn btn-success rounded-4 px-4">Confirm Payment</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function showCashModal(category, label, due) {
+        due = parseFloat(due) || 0;
+        document.getElementById('modalCategory').value = category;
+        document.getElementById('modalLabelDisplay').innerText = label;
+        document.getElementById('modalAmount').value = due;
+        document.getElementById('modalDueHint').innerText = "₹" + due.toLocaleString();
+        
+        var myModal = new bootstrap.Modal(document.getElementById('cashPayModal'));
+        myModal.show();
+      }
+
+      // 🤖 Fetch AI Risk Score
+      document.addEventListener('DOMContentLoaded', function() {
+        const container = document.getElementById('riskScoreContainer');
+        const studentId = container ? container.dataset.studentId : null;
+        
+        // Also animate progress bars safely
+        document.querySelectorAll('.progress-bar').forEach(el => {
+            if (el.dataset.progress) el.style.width = el.dataset.progress + '%';
+        });
+
+        if (studentId) {
+          fetch(`/admin/student/${studentId}/risk-score`)
+            .then(response => response.json())
+            .then(data => {
+              if (data.level) {
+                const badge = document.getElementById('riskBadge');
+                const emoji = document.getElementById('riskEmoji');
+                const level = document.getElementById('riskLevel');
+                const scoreVal = document.getElementById('riskScoreValue');
+
+                container.classList.remove('d-none');
+                badge.classList.add(`text-bg-${data.badge_class}`);
+                emoji.innerText = data.emoji;
+                level.innerText = data.level;
+                scoreVal.innerText = `AI Score: ${data.score}/100`;
+
+                // Tooltip with reasons
+                const reasonsHtml = `<div class="text-start"><strong>Reasons:</strong><ul class="mb-0 ps-3">` + 
+                  data.reasons.map(r => `<li>${r}</li>`).join('') + `</ul></div>`;
+                badge.setAttribute('title', reasonsHtml);
+                new bootstrap.Tooltip(badge);
+              }
+            })
+            .catch(err => console.error('Error fetching risk score:', err));
+        }
+      });
+    </script>
+
+    <!-- Payments -->
+    <div class="card border-0 shadow-sm rounded-4 mt-3">
+      <div class="card-body p-4">
+        <h5 class="fw-bold mb-3">Payments</h5>
+
+        {% if payments %}
+        <div class="table-responsive">
+          <table class="table align-middle mb-0">
+            <thead class="text-muted small">
+              <tr>
+                <th>Txn ID</th>
+                <th>Method</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th class="text-end">Receipt</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in payments %}
+              <tr>
+                <td class="fw-semibold">{{ p.txn_id }}</td>
+                <td>{{ p.method }}</td>
+                <td>₹{{ "{:,}".format((p.amount or 0)|int) }}</td>
+                <td>
+                  {% if p.status == "SUCCESS" %}
+                  <span class="badge text-bg-success">SUCCESS</span>
+                  {% elif p.status == "FAILED" %}
+                  <span class="badge text-bg-danger">FAILED</span>
+                  {% else %}
+                  <span class="badge text-bg-warning">INITIATED</span>
+                  {% endif %}
+                </td>
+                <td class="text-muted small">{{ p.created_at }}</td>
+                <td class="text-end">
+                  {% if p.status == "SUCCESS" %}
+                  <div class="btn-group">
+                    <a class="btn btn-sm btn-outline-primary"
+                      href="{{ url_for('admin.admin_receipt_pdf', txn_id=p.txn_id) }}">
+                      PDF
+                    </a>
+                    {% if p.receipt %}
+                    <a class="btn btn-sm btn-outline-success"
+                      href="{{ url_for('admin.verify_receipt', receipt_no=p.receipt.receipt_no) }}">
+                      Verify
+                    </a>
+                    {% endif %}
+                  </div>
+                  {% else %}
+                  —
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+        <div class="text-muted">No payments found.</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

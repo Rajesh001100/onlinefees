@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Receipt Verification — {{ inst_name }}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 60%, #0f4c75 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .card {
+      background: rgba(255,255,255,0.04);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 24px;
+      max-width: 520px;
+      width: 100%;
+      padding: 40px 36px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+      animation: fadeUp 0.6s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .badge-valid {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(34,197,94,0.15);
+      border: 1px solid rgba(34,197,94,0.4);
+      color: #4ade80;
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 14px; font-weight: 700; letter-spacing: 0.5px;
+      margin-bottom: 24px;
+    }
+    .badge-invalid {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(239,68,68,0.15);
+      border: 1px solid rgba(239,68,68,0.4);
+      color: #f87171;
+      border-radius: 999px;
+      padding: 8px 20px;
+      font-size: 14px; font-weight: 700;
+      margin-bottom: 24px;
+    }
+
+    .pulse { animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
+
+    h1 { color: #fff; font-size: 26px; font-weight: 900; margin-bottom: 4px; }
+    .subtitle { color: rgba(255,255,255,0.5); font-size: 13px; margin-bottom: 32px; }
+
+    .divider { height: 1px; background: rgba(255,255,255,0.08); margin: 24px 0; }
+
+    .field { margin-bottom: 18px; }
+    .field-label { color: rgba(255,255,255,0.45); font-size: 11px; font-weight: 600; letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 4px; }
+    .field-value { color: #fff; font-size: 16px; font-weight: 600; }
+    .field-value.amount { font-size: 28px; font-weight: 900; color: #4ade80; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
+
+    .inst-footer {
+      margin-top: 32px;
+      text-align: center;
+      color: rgba(255,255,255,0.3);
+      font-size: 11px;
+      letter-spacing: 0.3px;
+    }
+
+    .method-badge {
+      display: inline-block;
+      background: rgba(99,102,241,0.2);
+      border: 1px solid rgba(99,102,241,0.4);
+      color: #a5b4fc;
+      border-radius: 6px;
+      padding: 2px 10px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .shield { font-size: 52px; display: block; text-align: center; margin-bottom: 16px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    {% if payment %}
+      <!-- VALID RECEIPT -->
+      <span class="shield">🛡️</span>
+      <div style="text-align:center;">
+        <div class="badge-valid">
+          <span class="pulse">●</span> VERIFIED AUTHENTIC
+        </div>
+      </div>
+
+      <h1>Fee Receipt Verified</h1>
+      <p class="subtitle">This receipt has been cryptographically verified as genuine by {{ inst_name }}.</p>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <div class="field-label">Receipt Number</div>
+        <div class="field-value">{{ receipt_no }}</div>
+      </div>
+
+      <div class="field">
+        <div class="field-label">Amount Paid</div>
+        <div class="field-value amount">₹{{ "{:,}".format(payment.amount) }}</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid-2">
+        <div class="field">
+          <div class="field-label">Student Name</div>
+          <div class="field-value" style="font-size:14px;">{{ student.name }}</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Admission No</div>
+          <div class="field-value" style="font-size:14px;">{{ student.admission_no }}</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Category</div>
+          <div class="field-value" style="font-size:14px;">{{ payment.category }} Fee</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Payment Method</div>
+          <div class="field-value"><span class="method-badge">{{ payment.method.replace('_', ' ') }}</span></div>
+        </div>
+        <div class="field">
+          <div class="field-label">Transaction ID</div>
+          <div class="field-value" style="font-size:12px; word-break:break-all;">{{ payment.txn_id }}</div>
+        </div>
+        <div class="field">
+          <div class="field-label">Date & Time</div>
+          <div class="field-value" style="font-size:13px;">
+            {{ payment.created_at.strftime('%d %b %Y, %I:%M %p') if payment.created_at else '-' }}
+          </div>
+        </div>
+      </div>
+
+      <div class="inst-footer">
+        <strong style="color:rgba(255,255,255,0.6);">{{ inst_name }}</strong><br>
+        T.N.Palayam, Gobi Tk, Erode Dt — 04285-262149<br>
+        Digitally verified receipt • Secure Gateway
+      </div>
+
+      <div class="mt-4 text-center">
+        <a href="/admin/dashboard" class="btn btn-outline-light btn-sm rounded-pill px-4" style="text-decoration:none; color:rgba(255,255,255,0.7); border:1px solid rgba(255,255,255,0.2); background:transparent; font-size:12px; transition:0.3s; padding: 6px 16px;">
+          <i class="fa-solid fa-arrow-left me-1"></i> Back to Admin Dashboard
+        </a>
+      </div>
+
+    {% else %}
+      <!-- INVALID RECEIPT -->
+      <span class="shield">⚠️</span>
+      <div style="text-align:center;">
+        <div class="badge-invalid">● RECEIPT NOT FOUND</div>
+      </div>
+      <h1 style="text-align:center;">Verification Failed</h1>
+      <p class="subtitle" style="text-align:center;">
+        Receipt <strong style="color:#f87171;">{{ receipt_no }}</strong> could not be verified.
+        It may be invalid, tampered, or not yet issued.
+      </p>
+
+      <div class="mt-5 text-center">
+        <a href="/admin/dashboard" class="btn btn-primary rounded-pill px-5 shadow-lg fw-bold" style="text-decoration:none;">
+          Return to Dashboard
+        </a>
+      </div>
+
+      <div class="inst-footer" style="margin-top:40px;">
+        Contact the tech department if you believe this is an error.<br>
+        <strong style="color:rgba(255,255,255,0.6);">{{ inst_name }}</strong> — Admin Verification System
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

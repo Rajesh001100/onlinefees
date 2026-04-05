@@ -1,0 +1,59 @@
+{% extends "student/student_base.html" %}
+
+{% block student_content %}
+<div class="container py-5">
+
+  <!-- Page Title -->
+  <div class="text-center mb-5">
+    <h2 class="fw-bold mb-1">JKK Munirajah Institution</h2>
+    <p class="text-muted">Select your institute to continue</p>
+  </div>
+
+  <div class="row g-4 justify-content-center">
+
+    {% for i in institutes %}
+    {% set accent =
+    'accent-eng' if i.code == 'ENG'
+    else 'accent-agri' if i.code == 'AGRI'
+    else 'accent-pharm'
+    %}
+
+    <div class="col-12 col-md-4">
+      <a href="{{ url_for('student.set_institute', code=i.code) }}" class="text-decoration-none text-dark">
+
+        <div class="card hover-lift h-100 p-4">
+
+          <!-- Icon -->
+          <div class="mb-3">
+            <img src="{{ url_for('static', filename=i.icon) }}" alt="{{ i.short }}" style="width:42px;height:42px;">
+          </div>
+
+          <!-- Title -->
+          <h5 class="fw-bold {{ accent }} mb-1">
+            {{ i.short }}
+          </h5>
+
+          <!-- Subtitle -->
+          <div class="text-muted small mb-3">
+            {{ i.full }}
+          </div>
+
+          <!-- Footer row -->
+          <div class="d-flex justify-content-between align-items-center mt-auto">
+            <span class="badge text-bg-light border">
+              Code: {{ i.code }}
+            </span>
+
+            <span class="fw-semibold {{ accent }}">
+              Continue →
+            </span>
+          </div>
+
+        </div>
+      </a>
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
+{% endblock %}

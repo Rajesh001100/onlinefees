@@ -1,0 +1,1122 @@
+.E.E...E..E......EFEFEFEFEFEFE.E.EFE..E.E.E.EFEFEFEFEFE......            [100%]
+=================================== ERRORS ====================================
+_______________ ERROR at teardown of test_database_list_access ________________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmph60femao.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmph60femao.db
+____________ ERROR at teardown of test_database_table_view_access _____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpv2m_402m.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpv2m_402m.db
+_____ ERROR at teardown of TestAdminLogin.test_login_invalid_credentials ______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpg5awpq5a.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpg5awpq5a.db
+___________ ERROR at teardown of TestAdminLogin.test_login_success ____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpty0i4kqv.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpty0i4kqv.db
+___ ERROR at teardown of TestAccessControl.test_admin_can_access_dashboard ____
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpa97iq4un.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpa97iq4un.db
+____________ ERROR at teardown of TestFeeEngine.test_get_fee_state ____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp3lobe4hl.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp3lobe4hl.db
+__________ ERROR at teardown of TestFeeEngine.test_fee_plan_amounts ___________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp7vl89q9f.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp7vl89q9f.db
+______ ERROR at teardown of TestFeeEngine.test_no_fee_plan_returns_error ______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpdmlx8bzh.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpdmlx8bzh.db
+______ ERROR at teardown of TestFeeEngine.test_get_full_course_fee_state ______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmplpx1bwca.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmplpx1bwca.db
+_______ ERROR at teardown of TestFeeEngine.test_7_5_reservation_waiver ________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmptq0kjmhz.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmptq0kjmhz.db
+______ ERROR at teardown of TestFeeEngine.test_hostel_payment_waterfall _______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpuxqrjk04.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpuxqrjk04.db
+________ ERROR at teardown of TestFeeRoutes.test_admin_fee_plans_page _________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjpou3fb4.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjpou3fb4.db
+_______ ERROR at teardown of TestFeeRoutes.test_admin_installments_page _______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp5be4xnrc.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp5be4xnrc.db
+__________ ERROR at teardown of TestFeeRoutes.test_student_fees_page __________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpe8zm1m_2.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpe8zm1m_2.db
+_____________ ERROR at teardown of TestReports.test_daily_summary _____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp51i5hui4.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp51i5hui4.db
+______________ ERROR at teardown of TestReports.test_audit_logs _______________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpkfvu75iy.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpkfvu75iy.db
+_____________ ERROR at teardown of TestReports.test_analytics_api _____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpeov00zda.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpeov00zda.db
+___________ ERROR at teardown of TestStudentList.test_classes_page ____________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpppnx1992.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpppnx1992.db
+___ ERROR at teardown of TestStudentList.test_students_list_with_pagination ___
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpkhf5ipra.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpkhf5ipra.db
+_______ ERROR at teardown of TestStudentList.test_students_list_search ________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpf0yn54o5.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpf0yn54o5.db
+________ ERROR at teardown of TestStudentList.test_students_list_sort _________
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjo4pa51v.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjo4pa51v.db
+_______ ERROR at teardown of TestStudentView.test_view_existing_student _______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpim8sconr.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpim8sconr.db
+_____ ERROR at teardown of TestStudentView.test_view_nonexistent_student ______
+tests\conftest.py:93: in app
+    os.unlink(db_path)
+E   PermissionError: [WinError 32] The process cannot access the file because it is being used by another process: 'C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjxqys8pc.db'
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjxqys8pc.db
+================================== FAILURES ===================================
+______________________ TestFeeEngine.test_get_fee_state _______________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:18: in test_get_fee_state
+    state = get_fee_state_for_student(db, student_id=1)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:292: in get_fee_state_for_student
+    return _cached_fee_state(student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:288: in _cached_fee_state
+    return _get_fee_state_internal(_db, student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:299: in _get_fee_state_internal
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp3lobe4hl.db
+_____________________ TestFeeEngine.test_fee_plan_amounts _____________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:31: in test_fee_plan_amounts
+    state = get_fee_state_for_student(db, student_id=1)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:292: in get_fee_state_for_student
+    return _cached_fee_state(student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:288: in _cached_fee_state
+    return _get_fee_state_internal(_db, student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:299: in _get_fee_state_internal
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmp7vl89q9f.db
+________________ TestFeeEngine.test_no_fee_plan_returns_error _________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:62: in test_no_fee_plan_returns_error
+    state = get_fee_state_for_student(db, student_id=sid)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:292: in get_fee_state_for_student
+    return _cached_fee_state(student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:288: in _cached_fee_state
+    return _get_fee_state_internal(_db, student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:299: in _get_fee_state_internal
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (2,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpdmlx8bzh.db
+________________ TestFeeEngine.test_get_full_course_fee_state _________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:78: in test_get_full_course_fee_state
+    state = get_full_course_fee_state(db, student_id=1)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:467: in get_full_course_fee_state
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmplpx1bwca.db
+__________________ TestFeeEngine.test_7_5_reservation_waiver __________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:97: in test_7_5_reservation_waiver
+    state = get_fee_state_for_student(db, student_id=1)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:292: in get_fee_state_for_student
+    return _cached_fee_state(student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:288: in _cached_fee_state
+    return _get_fee_state_internal(_db, student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:299: in _get_fee_state_internal
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmptq0kjmhz.db
+_________________ TestFeeEngine.test_hostel_payment_waterfall _________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:126: in test_hostel_payment_waterfall
+    state = get_full_course_fee_state(db, student_id=1)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:467: in get_full_course_fee_state
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpuxqrjk04.db
+____________________ TestFeeRoutes.test_student_fees_page _____________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+tests\test_fees.py:144: in test_student_fees_page
+    resp = student_session.get("/student/fees")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:73: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\student\routes.py:240: in fees
+    fee_state = get_fee_state_for_student(db, student_id=student["id"])
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:292: in get_fee_state_for_student
+    return _cached_fee_state(student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:899: in decorated_function
+    rv = self._call_fn(f, *args, **kwargs)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask_caching\__init__.py:185: in _call_fn
+    return ensure_sync(fn)(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:288: in _cached_fee_state
+    return _get_fee_state_internal(_db, student_id)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\fees.py:299: in _get_fee_state_internal
+    s = Student.query.get(student_id)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+<string>:2: in get
+    ???
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\util\deprecations.py:386: in warned
+    return fn(*args, **kwargs)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1126: in get
+    return self._get_impl(ident, loading.load_on_pk_identity)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:1135: in _get_impl
+    return self.session._get_impl(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:3859: in _get_impl
+    return db_load_fn(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\loading.py:695: in load_on_pk_identity
+    session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ?]
+E   [parameters: (1,)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpe8zm1m_2.db
+_____________ TestStudentList.test_students_list_with_pagination ______________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+D:\college_fees_system\tests\test_students.py:13: in test_students_list_with_pagination
+    resp = admin_session.get("/admin/year/1/class/CSE/students?page=1")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:52: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\admin\views\students.py:67: in students
+    total = q_base.count()
+            ^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:3146: in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2835: in scalar
+    ret = self.one()
+          ^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2808: in one
+    return self._iter().one()  # type: ignore
+           ^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2857: in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT count(*) AS count_1 
+E   FROM (SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.institute_id = ? AND students.year = ? AND students.class = ? AND students.is_active != ?) AS anon_1]
+E   [parameters: ('ENG', 1, 'CSE', 0)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpkhf5ipra.db
+__________________ TestStudentList.test_students_list_search __________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+D:\college_fees_system\tests\test_students.py:17: in test_students_list_search
+    resp = admin_session.get("/admin/year/1/class/CSE/students?q=TEST")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:52: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\admin\views\students.py:67: in students
+    total = q_base.count()
+            ^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:3146: in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2835: in scalar
+    ret = self.one()
+          ^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2808: in one
+    return self._iter().one()  # type: ignore
+           ^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2857: in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT count(*) AS count_1 
+E   FROM (SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.institute_id = ? AND students.year = ? AND students.class = ? AND students.is_active != ? AND (students.admission_no LIKE ? OR students.name LIKE ? OR students.register_no LIKE ?)) AS anon_1]
+E   [parameters: ('ENG', 1, 'CSE', 0, '%TEST%', '%TEST%', '%TEST%')]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpf0yn54o5.db
+___________________ TestStudentList.test_students_list_sort ___________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+D:\college_fees_system\tests\test_students.py:21: in test_students_list_sort
+    resp = admin_session.get("/admin/year/1/class/CSE/students?sort=name&order=desc")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:52: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\admin\views\students.py:67: in students
+    total = q_base.count()
+            ^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:3146: in count
+    self._legacy_from_self(col).enable_eagerloads(False).scalar()
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2835: in scalar
+    ret = self.one()
+          ^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2808: in one
+    return self._iter().one()  # type: ignore
+           ^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2857: in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT count(*) AS count_1 
+E   FROM (SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.institute_id = ? AND students.year = ? AND students.class = ? AND students.is_active != ?) AS anon_1]
+E   [parameters: ('ENG', 1, 'CSE', 0)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjo4pa51v.db
+_________________ TestStudentView.test_view_existing_student __________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+D:\college_fees_system\tests\test_students.py:27: in test_view_existing_student
+    resp = admin_session.get("/admin/student/1")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:52: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\admin\views\students.py:109: in student_view
+    student = Student.query.filter_by(id=student_id, institute_id=inst_id).first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2759: in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2857: in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ? AND students.institute_id = ?
+E    LIMIT ? OFFSET ?]
+E   [parameters: (1, 'ENG', 1, 0)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpim8sconr.db
+________________ TestStudentView.test_view_nonexistent_student ________________
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.OperationalError: no such column: students.hostel_sem3
+
+The above exception was the direct cause of the following exception:
+D:\college_fees_system\tests\test_students.py:32: in test_view_nonexistent_student
+    resp = admin_session.get("/admin/student/9999", follow_redirects=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1162: in get
+    return self.open(*args, **kw)
+           ^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\testing.py:235: in open
+    response = super().open(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1116: in open
+    response_parts = self.run_wsgi_app(request.environ, buffered=buffered)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:988: in run_wsgi_app
+    rv = run_wsgi_app(self.application, environ, buffered=buffered)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\werkzeug\test.py:1264: in run_wsgi_app
+    app_rv = app(environ, start_response)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1498: in __call__
+    return self.wsgi_app(environ, start_response)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1476: in wsgi_app
+    response = self.handle_exception(e)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:1473: in wsgi_app
+    response = self.full_dispatch_request()
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:882: in full_dispatch_request
+    rv = self.handle_user_exception(e)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:880: in full_dispatch_request
+    rv = self.dispatch_request()
+         ^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\flask\app.py:865: in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+utils\auth.py:52: in wrapper
+    return fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^
+blueprints\admin\views\students.py:109: in student_view
+    student = Student.query.filter_by(id=student_id, institute_id=inst_id).first()
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2759: in first
+    return self.limit(1)._iter().first()  # type: ignore
+           ^^^^^^^^^^^^^^^^^^^^^
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\query.py:2857: in _iter
+    result: Union[ScalarResult[_T], Result[_T]] = self.session.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2351: in execute
+    return self._execute_internal(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\session.py:2249: in _execute_internal
+    result: Result[Any] = compile_state_cls.orm_execute_statement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\orm\context.py:306: in orm_execute_statement
+    result = conn.execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1419: in execute
+    return meth(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\sql\elements.py:527: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1641: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1846: in _execute_context
+    return self._exec_single_context(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1986: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:2363: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\base.py:1967: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\Rajesh M\AppData\Roaming\Python\Python313\site-packages\sqlalchemy\engine\default.py:952: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.OperationalError: (sqlite3.OperationalError) no such column: students.hostel_sem3
+E   [SQL: SELECT students.id AS students_id, students.user_id AS students_user_id, students.admission_no AS students_admission_no, students.register_no AS students_register_no, students.name AS students_name, students.dob AS students_dob, students.year AS students_year, students.class AS students_class, students.course AS students_course, students.student_email AS students_student_email, students.parent_email AS students_parent_email, students.student_phone AS students_student_phone, students.parent_phone AS students_parent_phone, students.institute_id AS students_institute_id, students.photo_filename AS students_photo_filename, students.is_hosteller AS students_is_hosteller, students.hostel_sem1 AS students_hostel_sem1, students.hostel_sem2 AS students_hostel_sem2, students.hostel_sem3 AS students_hostel_sem3, students.hostel_sem4 AS students_hostel_sem4, students.hostel_sem5 AS students_hostel_sem5, students.hostel_sem6 AS students_hostel_sem6, students.hostel_sem7 AS students_hostel_sem7, students.hostel_sem8 AS students_hostel_sem8, students.scholarship_type AS students_scholarship_type, students.quota_type AS students_quota_type, students.is_first_graduate AS students_is_first_graduate, students.is_active AS students_is_active, students.created_at AS students_created_at 
+E   FROM students 
+E   WHERE students.id = ? AND students.institute_id = ?
+E    LIMIT ? OFFSET ?]
+E   [parameters: (9999, 'ENG', 1, 0)]
+E   (Background on this error at: https://sqlalche.me/e/20/e3q8)
+---------------------------- Captured stdout setup ----------------------------
+\u2705 USING DATABASE_PATH = C:\\Users\\RAJESH~1\\AppData\\Local\\Temp\\tmpjxqys8pc.db
+=========================== short test summary info ===========================
+FAILED tests/test_fees.py::TestFeeEngine::test_get_fee_state - sqlalchemy.exc...
+FAILED tests/test_fees.py::TestFeeEngine::test_fee_plan_amounts - sqlalchemy....
+FAILED tests/test_fees.py::TestFeeEngine::test_no_fee_plan_returns_error - sq...
+FAILED tests/test_fees.py::TestFeeEngine::test_get_full_course_fee_state - sq...
+FAILED tests/test_fees.py::TestFeeEngine::test_7_5_reservation_waiver - sqlal...
+FAILED tests/test_fees.py::TestFeeEngine::test_hostel_payment_waterfall - sql...
+FAILED tests/test_fees.py::TestFeeRoutes::test_student_fees_page - sqlalchemy...
+FAILED tests/test_students.py::TestStudentList::test_students_list_with_pagination
+FAILED tests/test_students.py::TestStudentList::test_students_list_search - s...
+FAILED tests/test_students.py::TestStudentList::test_students_list_sort - sql...
+FAILED tests/test_students.py::TestStudentView::test_view_existing_student - ...
+FAILED tests/test_students.py::TestStudentView::test_view_nonexistent_student
+ERROR tests/test_admin_database.py::test_database_list_access - PermissionErr...
+ERROR tests/test_admin_database.py::test_database_table_view_access - Permiss...
+ERROR tests/test_auth.py::TestAdminLogin::test_login_invalid_credentials - Pe...
+ERROR tests/test_auth.py::TestAdminLogin::test_login_success - PermissionErro...
+ERROR tests/test_auth.py::TestAccessControl::test_admin_can_access_dashboard
+ERROR tests/test_fees.py::TestFeeEngine::test_get_fee_state - PermissionError...
+ERROR tests/test_fees.py::TestFeeEngine::test_fee_plan_amounts - PermissionEr...
+ERROR tests/test_fees.py::TestFeeEngine::test_no_fee_plan_returns_error - Per...
+ERROR tests/test_fees.py::TestFeeEngine::test_get_full_course_fee_state - Per...
+ERROR tests/test_fees.py::TestFeeEngine::test_7_5_reservation_waiver - Permis...
+ERROR tests/test_fees.py::TestFeeEngine::test_hostel_payment_waterfall - Perm...
+ERROR tests/test_fees.py::TestFeeRoutes::test_admin_fee_plans_page - Permissi...
+ERROR tests/test_fees.py::TestFeeRoutes::test_admin_installments_page - Permi...
+ERROR tests/test_fees.py::TestFeeRoutes::test_student_fees_page - PermissionE...
+ERROR tests/test_fees.py::TestReports::test_daily_summary - PermissionError: ...
+ERROR tests/test_fees.py::TestReports::test_audit_logs - PermissionError: [Wi...
+ERROR tests/test_fees.py::TestReports::test_analytics_api - PermissionError: ...
+ERROR tests/test_students.py::TestStudentList::test_classes_page - Permission...
+ERROR tests/test_students.py::TestStudentList::test_students_list_with_pagination
+ERROR tests/test_students.py::TestStudentList::test_students_list_search - Pe...
+ERROR tests/test_students.py::TestStudentList::test_students_list_sort - Perm...
+ERROR tests/test_students.py::TestStudentView::test_view_existing_student - P...
+ERROR tests/test_students.py::TestStudentView::test_view_nonexistent_student
+12 failed, 26 passed, 9 warnings, 23 errors in 20.79s

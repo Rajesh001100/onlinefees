@@ -1,0 +1,260 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+
+<div class="container py-4">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <div>
+      <h4 class="fw-bold mb-0">Fee Settings</h4>
+      <div class="text-muted small">{{ student.name }} • {{ student.admission_no }}</div>
+    </div>
+    <a href="{{ url_for('admin.student_view', student_id=student.id) }}"
+       class="btn btn-outline-secondary rounded-4">
+      Back
+    </a>
+  </div>
+
+  {% if fee_plan_warning %}
+    <div class="alert alert-warning rounded-4">
+      <div class="fw-semibold mb-1">Fee Plan Warning</div>
+      <div class="small">
+        No fee plan found for this institute + selected course + year.
+        Base total will show 0 until you create the fee plan.
+      </div>
+    </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+
+      <form method="POST">
+        <!-- COURSE + PLAN ROW -->
+        <div class="row g-4 align-items-start">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Course</label>
+
+            <input type="hidden" name="_action" id="_action" value="save">
+
+            <select class="form-select rounded-4"
+                    name="course"
+                    onchange="document.getElementById('_action').value='course'; this.form.submit();">
+              {% for c in course_options %}
+                <option value="{{ c }}" {% if c == form.course %}selected{% endif %}>{{ c }}</option>
+              {% endfor %}
+            </select>
+
+            <div class="text-muted small mt-2">
+              Changing course updates the base fee plan (Institute + Course + Year).
+            </div>
+          </div>
+
+          <div class="col-md-8">
+            <div class="p-4 bg-light rounded-4">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="fw-semibold mb-2">Course Fee Plan (Read Only)</div>
+                <div class="text-end">
+                  <div class="text-muted small">Net Total</div>
+                  <div class="fw-bold">₹{{ fee_state.total }}</div>
+                  <div class="text-muted small mt-1">
+                    Paid: ₹{{ fee_state.paid }} • Due: ₹{{ fee_state.due }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="text-muted small">Tuition</div>
+                  <div class="fw-bold">₹{{ plan.tuition }}</div>
+                </div>
+                <div class="col-md-6">
+                  <div class="text-muted small">Other</div>
+                  <div class="fw-bold">₹{{ plan.other }}</div>
+                </div>
+              </div>
+
+              <div class="mt-3 small text-muted">
+                Base Total: ₹{{ plan.base_total }}
+              </div>
+
+              <div class="small text-muted">
+                Exam is NOT included in base. Add Exam Fee only during exam/arrear time.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- HOSTEL / BUS -->
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Hostel / Bus</label>
+            <select class="form-select rounded-4" id="hb_mode" name="is_hosteller">
+              <option value="0" {% if form.is_hosteller == 0 %}selected{% endif %}>Day Scholar (Bus)</option>
+              <option value="1" {% if form.is_hosteller == 1 %}selected{% endif %}>Hosteller</option>
+            </select>
+            <div class="text-muted small mt-2">Only one applies at a time.</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Hostel Fee</label>
+            <input class="form-control rounded-4"
+                   id="hostel_fee"
+                   name="hostel_fee"
+                   type="number" min="0" step="1"
+                   value="{{ form.hostel_fee or 0 }}">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Bus Fee</label>
+            <input class="form-control rounded-4"
+                   id="bus_fee"
+                   name="bus_fee"
+                   type="number" min="0" step="1"
+                   value="{{ form.bus_fee or 0 }}">
+          </div>
+        </div>
+
+        <!-- Hosteller extras -->
+        <div class="row g-4 align-items-end mt-2" id="hostel_extras">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Gym Fee (Hostel)</label>
+            <input class="form-control rounded-4"
+                   id="gym_fee"
+                   name="gym_fee"
+                   type="number" min="0" step="1"
+                   value="{{ form.gym_fee or 0 }}">
+            <div class="text-muted small mt-2">Applied only for Hosteller</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Laundry Fee (Hostel)</label>
+            <input class="form-control rounded-4"
+                   id="laundry_fee"
+                   name="laundry_fee"
+                   type="number" min="0" step="1"
+                   value="{{ form.laundry_fee or 0 }}">
+            <div class="text-muted small mt-2">Applied only for Hosteller</div>
+          </div>
+
+          <div class="col-md-4"></div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- EXAM (ON-DEMAND) -->
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Exam Fee (Only when applicable)</label>
+            <input class="form-control rounded-4"
+                   name="exam_fee"
+                   type="number" min="0" step="1"
+                   value="{{ form.exam_fee or 0 }}">
+            <div class="text-muted small mt-2">Saved as adjustment (EXAM)</div>
+          </div>
+          <div class="col-md-8"></div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- SCHOLARSHIP / QUOTA -->
+        <div class="row g-4 align-items-end">
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Scholarship Type</label>
+            <select class="form-select rounded-4" name="scholarship_type">
+              {% for s in SCHOLARSHIPS %}
+                <option value="{{ s }}" {% if form.scholarship_type == s %}selected{% endif %}>{{ s }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Scholarship Amount</label>
+            <input class="form-control rounded-4"
+                   name="scholarship_amount"
+                   type="number" min="0" step="1"
+                   value="{{ form.scholarship_amount or 0 }}">
+            <div class="text-muted small mt-2">Applied as discount (-)</div>
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-semibold">Quota Type</label>
+            <select class="form-select rounded-4" name="quota_type">
+              {% for q in QUOTAS %}
+                <option value="{{ q }}" {% if form.quota_type == q %}selected{% endif %}>{{ q }}</option>
+              {% endfor %}
+            </select>
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-semibold">Quota Discount</label>
+            <input class="form-control rounded-4"
+                   name="quota_amount"
+                   type="number" min="0" step="1"
+                   value="{{ form.quota_amount or 0 }}">
+            <div class="text-muted small mt-2">Applied as discount (-)</div>
+          </div>
+        </div>
+
+        <hr class="my-4">
+
+        <!-- FIRST GRAD + SAVE -->
+        <div class="row g-3 align-items-end">
+          <div class="col-md-6">
+            <label class="form-label fw-semibold">First Graduate</label>
+            <select class="form-select rounded-4" name="is_first_graduate">
+              <option value="0" {% if form.is_first_graduate == 0 %}selected{% endif %}>No</option>
+              <option value="1" {% if form.is_first_graduate == 1 %}selected{% endif %}>Yes (₹{{ FIRST_GRAD_DISCOUNT }} discount)</option>
+            </select>
+          </div>
+
+          <div class="col-md-6 d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary rounded-4 px-4">
+              Save Settings
+            </button>
+          </div>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  function toggleHB() {
+    const mode = document.getElementById("hb_mode").value; // "1" hosteller, "0" bus
+
+    const hostel = document.getElementById("hostel_fee");
+    const bus = document.getElementById("bus_fee");
+    const gym = document.getElementById("gym_fee");
+    const laundry = document.getElementById("laundry_fee");
+    const extras = document.getElementById("hostel_extras");
+
+    if (mode === "1") {
+      hostel.disabled = false;
+      bus.disabled = true;
+      bus.value = 0;
+
+      extras.style.display = "";
+      gym.disabled = false;
+      laundry.disabled = false;
+    } else {
+      bus.disabled = false;
+      hostel.disabled = true;
+      hostel.value = 0;
+
+      extras.style.display = "none";
+      gym.disabled = true;
+      laundry.disabled = true;
+      gym.value = 0;
+      laundry.value = 0;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("hb_mode").addEventListener("change", toggleHB);
+    toggleHB();
+  });
+</script>
+
+{% endblock %}

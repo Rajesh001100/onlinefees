@@ -1,0 +1,128 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row mb-4 align-items-center">
+  <div class="col">
+    <h2 class="fw-bold mb-0">Audit Logs</h2>
+    <p class="text-muted">{{ total }} log{{ 's' if total != 1 else '' }} found — Track system activities and changes</p>
+  </div>
+</div>
+
+<div class="card glass border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <form class="row g-3" method="get">
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">ACTION</label>
+        <select name="action" class="form-select">
+          <option value="">All Actions</option>
+          {% for a in actions %}
+          <option value="{{ a }}" {% if request.args.get('action')==a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">DATE</label>
+        <input type="date" name="day" class="form-control" value="{{ day }}">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label small fw-bold text-muted">SEARCH</label>
+        <input type="text" name="q" class="form-control" placeholder="Search details..."
+          value="{{ request.args.get('q', '') }}">
+      </div>
+      <div class="col-md-3 d-flex align-items-end gap-2">
+        <button class="btn btn-primary flex-grow-1">Filter</button>
+        <a href="{{ url_for('admin.audit_logs') }}" class="btn btn-outline-secondary">Clear</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="card glass border-0 shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="bg-light">
+        <tr>
+          <th class="ps-4">Time</th>
+          <th>Actor</th>
+          <th>Action</th>
+          <th>Entity</th>
+          <th>Details</th>
+          <th>IP</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for log in logs %}
+        <tr>
+          <td class="ps-4 text-nowrap small text-muted">{{ log.created_at }}</td>
+          <td>
+            <div class="fw-bold">{{ log.admin_username or 'System' }}</div>
+            <div class="small text-muted">{{ log.actor_role or '-' }}</div>
+          </td>
+          <td>
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25">
+              {{ log.action }}
+            </span>
+          </td>
+          <td>
+            {% if log.entity_type %}
+            <div class="small">
+              <span class="fw-bold">{{ log.entity_type }}</span> #{{ log.entity_id }}
+            </div>
+            {% if log.student_adm %}
+            <div class="small text-muted">{{ log.student_adm }} — {{ log.student_name }}</div>
+            {% endif %}
+            {% else %}
+            <span class="text-muted">-</span>
+            {% endif %}
+          </td>
+          <td class="small text-muted" style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{
+            log.details_json or '-' }}</td>
+          <td class="small text-muted">{{ log.ip or '-' }}</td>
+        </tr>
+        {% else %}
+        <tr>
+          <td colspan="6" class="text-center py-5 text-muted">
+            No logs found matching your criteria.
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center" aria-label="Audit logs pagination">
+  <ul class="pagination">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link"
+        href="{{ url_for('admin.audit_logs', q=q, day=day, action=request.args.get('action',''), page=page-1) }}">
+        &laquo; Prev
+      </a>
+    </li>
+
+    {% for p in range(1, total_pages + 1) %}
+    {% if p == page %}
+    <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+    {% elif p <= 3 or p> total_pages - 2 or (p >= page - 1 and p <= page + 1) %} <li class="page-item">
+        <a class="page-link"
+          href="{{ url_for('admin.audit_logs', q=q, day=day, action=request.args.get('action',''), page=p) }}">
+          {{ p }}
+        </a>
+        </li>
+        {% elif p == 4 or p == total_pages - 2 %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+        {% endfor %}
+
+        <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+          <a class="page-link"
+            href="{{ url_for('admin.audit_logs', q=q, day=day, action=request.args.get('action',''), page=page+1) }}">
+            Next &raquo;
+          </a>
+        </li>
+  </ul>
+</nav>
+{% endif %}
+{% endblock %}

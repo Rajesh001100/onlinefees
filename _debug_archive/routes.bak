@@ -1,0 +1,3851 @@
+# blueprints/admin/routes.py
+  
+from __future__ import annotations
+  
+import uuid
+  
+import os
+from datetime import datetime
+  
+from io import BytesIO
+  
+from flask import Blueprint, render_template, request, session, redirect, url_for, flash, send_file, current_app
+  
+from reportlab.lib.pagesizes import A4
+  
+from reportlab.pdfgen import canvas
+  
+from reportlab.lib.units import mm
+  
+from utils.db import get_db
+  
+from utils.auth import verify_password
+  
+from flask import Blueprint
+  
+
+  
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+  
+# try to import hash_password (recommended)
+  
+try:
+  
+    from utils.auth import hash_password
+  
+except Exception:
+  
+    hash_password = None
+  
+from utils.decorators import admin_required
+  
+from utils.mailer import send_receipt_email
+  
+from utils.fees import get_fee_state_for_student
+  
+admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
+  
+
+  
+# -----------------------------
+  
+# Constants
+  
+# -----------------------------
+  
+SCHOLARSHIPS = ["NONE", "GOVT", "MERIT", "SPORTS", "OTHER"]
+  
+QUOTAS = ["REGULAR", "MGMT", "SC", "ST", "OBC", "EWS", "OTHER"]
+# Removed hardcoded FIRST_GRAD_DISCOUNT (refers to config now)
+  
+
+  
+
+  
+# -----------------------------
+  
+# Helpers
+  
+# -----------------------------
+  
+def rget(row, key, default=None):
+  
+    """Safe getter for sqlite3.Row (no .get())."""
+  
+    if row is None:
+  
+        return default
+  
+    try:
+  
+        return row[key] if key in row.keys() else default
+  
+    except Exception:
+  
+        return default
+  
+
+  
+
+  
+def to_int(val, default=0):
+  
+    try:
+  
+        if val is None:
+  
+            return default
+  
+        s = str(val).strip()
+  
+        if s == "":
+  
+            return default
+  
+        return int(float(s))
+  
+    except Exception:
+  
+        return default
+  
+
+  
+
+  
+def _only_digits(s: str) -> str:
+  
+    return "".join(ch for ch in (s or "") if ch.isdigit())
+  
+
+  
+
+  
+def _dob_to_ddmmyyyy(dob_value) -> str:
+  
+    """
+  
+    DB dob usually: YYYY-MM-DD
+  
+    Student password convention: DDMMYYYY
+  
+    """
+  
+    if not dob_value:
+  
+        return ""
+  
+    s = str(dob_value).strip()
+  
+    for fmt in ("%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d/%m/%Y"):
+  
+        try:
+  
+            dt = datetime.strptime(s[:10], fmt)
+  
+            return dt.strftime("%d%m%Y")
+  
+        except Exception:
+  
+            pass
+  
+
+  
+    digits = _only_digits(s)
+  
+    if len(digits) == 8 and digits.startswith(("19", "20")):
+  
+        try:
+  
+            dt = datetime.strptime(digits, "%Y%m%d")
+  
+            return dt.strftime("%d%m%Y")
+  
+        except Exception:
+  
+            pass
+  
+    return digits
+  
+
+  
+
+  
+def upsert_adjustment(db, student_id: int, category: str, label: str, amount: int):
+  
+    category = (category or "").strip().upper()
+  
+    label = (label or "").strip()
+  
+    amount = int(amount or 0)
+  
+
+  
+    db.execute(
+  
+        "DELETE FROM fee_adjustments WHERE student_id=? AND category=? AND label=?",
+  
+        (student_id, category, label),
+  
+    )
+  
+
+  
+    if amount != 0:
+  
+        db.execute(
+  
+            "INSERT INTO fee_adjustments (student_id, category, label, amount) VALUES (?,?,?,?)",
+  
+            (student_id, category, label, amount),
+  
+        )
+  
+
+  
+
+  
+def sum_adjustment_by_label(db, student_id: int, category: str, label: str) -> int:
+  
+    row = db.execute(
+  
+        """
+  
+        SELECT COALESCE(SUM(amount),0) AS a
+  
+        FROM fee_adjustments
+  
+        WHERE student_id=? AND category=? AND label=?
+  
+        """,
+  
+        (student_id, category, label),
+  
+    ).fetchone()
+  
+    return int(row["a"] or 0)
+  
+
+  
+
+  
+def _receipt_no(txn_id: str) -> str:
+  
+    today = datetime.now().strftime("%Y%m%d")
+  
+    tail = txn_id.replace("TXN-", "").replace("CASH-", "")[-6:]
+  
+    return f"RCPT-{today}-{tail}"
+  
+
+  
+
+  
+from io import BytesIO
+  
+from datetime import datetime
+  
+from reportlab.pdfgen import canvas
+  
+from reportlab.lib.pagesizes import A4
+  
+from reportlab.lib.units import mm
+  
+
+  
+def _build_receipt_pdf_bytes(student, inst, payment, receipt_no: str) -> bytes:
+  
+    """
+  
+    student: sqlite3.Row or dict with student fields
+  
+    inst: sqlite3.Row or dict with institute fields (optional)
+  
+    payment: sqlite3.Row or dict with payment fields
+  
+    """
+  
+
+  
+    # --- safe getter (works for sqlite3.Row + dict) ---
+  
+    try:
+  
+        _rget = rget  # use your existing helper if present
+  
+    except NameError:
+  
+        def _rget(obj, key, default=None):
+  
+            try:
+  
+                return obj[key]
+  
+            except Exception:
+  
+                return default
+  
+
+  
+    def sget(obj, key, default=""):
+  
+        v = _rget(obj, key, default)
+  
+        if v is None:
+  
+            return default
+  
+        return str(v)
+  
+
+  
+    def iget(obj, key, default=0):
+  
+        try:
+  
+            return int(_rget(obj, key, default) or 0)
+  
+        except Exception:
+  
+            return int(default)
+  
+
+  
+    def money(n: int) -> str:
+  
+        try:
+  
+            return f"₹{int(n):,}"
+  
+        except Exception:
+  
+            return f"₹{n}"
+  
+
+  
+    # Prefer payment time; fallback to now
+  
+    created_at = _rget(payment, "created_at", None)
+  
+    receipt_dt_str = None
+  
+    if created_at:
+  
+        receipt_dt_str = str(created_at)
+  
+    else:
+  
+        receipt_dt_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+  
+
+  
+    # Nice display date
+  
+    try:
+  
+        # If your created_at is ISO-ish, this works; otherwise keep as-is
+  
+        # We won't force-parse aggressively, just display safely.
+  
+        display_date = receipt_dt_str
+  
+    except Exception:
+  
+        display_date = str(receipt_dt_str)
+  
+
+  
+    inst_full = sget(inst, "full_name", "") if inst else ""
+  
+    if not inst_full:
+  
+        inst_full = sget(student, "institute_id", "-")
+  
+
+  
+    student_name = sget(student, "name", "-")
+  
+    admission_no = sget(student, "admission_no", "-")
+  
+    register_no = sget(student, "register_no", "-") or "-"
+  
+    class_name = sget(student, "class", "-") or "-"
+  
+    year_val = _rget(student, "year", None)
+  
+    year_str = f"{year_val}-Year" if year_val else "-"
+  
+
+  
+    stud_email = sget(student, "student_email", "-") or "-"
+  
+    parent_email = sget(student, "parent_email", "-") or "-"
+  
+
+  
+    txn_id = sget(payment, "txn_id", "-")
+  
+    method = sget(payment, "method", "-")
+  
+    status = sget(payment, "status", "-")
+  
+    category = sget(payment, "category", "-")  # ✅ added
+  
+    amount = iget(payment, "amount", 0)
+  
+
+  
+    # --- PDF drawing ---
+  
+    buf = BytesIO()
+  
+    c = canvas.Canvas(buf, pagesize=A4)
+  
+    width, height = A4
+  
+
+  
+    left = 18 * mm
+  
+    right = width - 18 * mm
+  
+    top = height - 18 * mm
+  
+    line = 6 * mm
+  
+
+  
+    # Header
+  
+    c.setFont("Helvetica-Bold", 16)
+  
+    c.drawString(left, top, "Fee Payment Receipt")
+  
+
+  
+    c.setFont("Helvetica", 10)
+  
+    c.drawRightString(right, top, f"Receipt No: {receipt_no}")
+  
+    c.drawRightString(right, top - line, f"Payment Date: {display_date}")
+  
+
+  
+    y = top - 2 * line
+  
+    c.line(left, y, right, y)
+  
+    y -= 2 * line
+  
+
+  
+    # Institution
+  
+    c.setFont("Helvetica-Bold", 12)
+  
+    c.drawString(left, y, "Institution")
+  
+    y -= line
+  
+    c.setFont("Helvetica", 10)
+  
+    c.drawString(left, y, inst_full)
+  
+    y -= 2 * line
+  
+
+  
+    # Student details
+  
+    c.setFont("Helvetica-Bold", 12)
+  
+    c.drawString(left, y, "Student Details")
+  
+    y -= line
+  
+    c.setFont("Helvetica", 10)
+  
+
+  
+    details = [
+  
+        ("Name", student_name),
+  
+        ("Admission No", admission_no),
+  
+        ("Register No", register_no),
+  
+        ("Class", class_name),
+  
+        ("Year", year_str),
+  
+        ("Student Email", stud_email),
+  
+        ("Parent Email", parent_email),
+  
+    ]
+  
+    for k, v in details:
+  
+        c.drawString(left, y, f"{k}: {v}")
+  
+        y -= line
+  
+
+  
+    y -= line
+  
+    c.line(left, y, right, y)
+  
+    y -= 2 * line
+  
+
+  
+    # Payment details
+  
+    c.setFont("Helvetica-Bold", 12)
+  
+    c.drawString(left, y, "Payment Details")
+  
+    y -= line
+  
+    c.setFont("Helvetica", 10)
+  
+
+  
+    pay_rows = [
+  
+        ("Transaction ID", txn_id),
+  
+        ("Category", category),          # ✅ added
+  
+        ("Method", method),
+  
+        ("Amount Paid", money(amount)),
+  
+        ("Status", status),
+  
+        ("Txn Time", display_date),
+  
+    ]
+  
+    for k, v in pay_rows:
+  
+        c.drawString(left, y, f"{k}: {v}")
+  
+        y -= line
+  
+
+  
+    # Footer
+  
+    y -= 2 * line
+  
+    c.setFont("Helvetica-Oblique", 9)
+  
+    c.drawString(left, y, "This is a system-generated receipt. No signature required.")
+  
+
+  
+    c.showPage()
+  
+    c.save()
+  
+    buf.seek(0)
+  
+    return buf.read()
+  
+
+  
+
+  
+def _require_hash_password():
+  
+    if not hash_password:
+  
+        raise RuntimeError("utils.auth.hash_password not found. Add it or change student auth design.")
+  
+    return hash_password
+  
+
+  
+
+  
+# -----------------------------
+  
+# Admin Login / Logout
+  
+# -----------------------------
+  
+@admin_bp.route("/login", methods=["GET", "POST"])
+  
+def login():
+  
+    if request.method == "POST":
+  
+        username = (request.form.get("username") or "").strip()
+  
+        password = (request.form.get("password") or "").strip()
+  
+
+  
+        db = get_db()
+  
+        user = db.execute(
+  
+            """
+  
+            SELECT id, username, password_hash, role, institute_id, is_active
+  
+            FROM users
+  
+            WHERE username=? AND role IN ('ADMIN','FOUNDER')
+  
+            """,
+  
+            (username,),
+  
+        ).fetchone()
+  
+
+  
+        if (
+  
+            not user
+  
+            or user["is_active"] != 1
+  
+            or not verify_password(user["password_hash"], password)
+  
+        ):
+  
+            flash("Invalid username/password.", "danger")
+  
+            return render_template("admin/login.html")
+  
+
+  
+        session.clear()
+  
+        session["user_id"] = user["id"]
+  
+        session["role"] = user["role"]
+  
+
+  
+        # ADMIN is tied to one institute
+  
+        if user["role"] == "ADMIN":
+  
+            session["institute_id"] = user["institute_id"]
+  
+            session.pop("active_institute_id", None)
+  
+        else:
+  
+            # Founder can READ ALL by default
+  
+            session.pop("institute_id", None)
+  
+            session["active_institute_id"] = None  # set later via a UI switch if needed
+  
+
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    return render_template("admin/login.html")
+  
+
+  
+
+  
+@admin_bp.get("/logout")
+  
+def logout():
+  
+    session.clear()
+  
+    return redirect(url_for("admin.login"))
+  
+
+  
+# -----------------------------
+# Audit Logs
+# -----------------------------
+# -----------------------------
+# Audit Logs (See implementation below)
+# -----------------------------
+# (Removed duplicate definition)
+
+
+# -----------------------------
+# Dashboard
+# -----------------------------
+  
+@admin_bp.get("/dashboard")
+  
+@admin_required
+  
+def dashboard():
+  
+    db = get_db()
+  
+
+  
+    role = session.get("role")
+  
+
+  
+    # founder can filter: /admin/dashboard?inst=ENG
+  
+    selected_inst = (request.args.get("inst") or "").strip() if role == "FOUNDER" else None
+  
+
+  
+    if role == "ADMIN":
+  
+        inst_id = session.get("institute_id")
+  
+
+  
+        inst = db.execute(
+  
+            "SELECT id, short_name, full_name FROM institutes WHERE id=?",
+  
+            (inst_id,),
+  
+        ).fetchone()
+  
+
+  
+        rows = db.execute(
+  
+            """
+  
+            SELECT year, COUNT(*) AS c
+  
+            FROM students
+  
+            WHERE institute_id=? AND COALESCE(is_active,1)=1
+  
+            GROUP BY year
+  
+            ORDER BY year
+  
+            """,
+  
+            (inst_id,),
+  
+        ).fetchall()
+  
+
+  
+        counts = {r["year"]: r["c"] for r in rows}
+  
+        year_cards = [{"year": y, "count": counts.get(y, 0)} for y in [1, 2, 3, 4]]
+  
+
+  
+        return render_template(
+  
+            "admin/dashboard.html",
+  
+            inst=inst,
+  
+            year_cards=year_cards,
+  
+        )
+  
+
+  
+    # ---------- FOUNDER MODE ----------
+  
+    institutes = db.execute(
+  
+        "SELECT id, short_name, full_name FROM institutes ORDER BY id"
+  
+    ).fetchall()
+  
+
+  
+    where = ["COALESCE(is_active,1)=1"]
+  
+    params = []
+  
+
+  
+    if selected_inst:
+  
+        where.append("institute_id=?")
+  
+        params.append(selected_inst)
+  
+
+  
+    where_sql = " AND ".join(where)
+  
+
+  
+    # totals across scope grouped by year
+  
+    rows = db.execute(
+  
+        f"""
+  
+        SELECT year, COUNT(*) AS c
+  
+        FROM students
+  
+        WHERE {where_sql}
+  
+        GROUP BY year
+  
+        ORDER BY year
+  
+        """,
+  
+        params,
+  
+    ).fetchall()
+  
+
+  
+    counts = {r["year"]: r["c"] for r in rows}
+  
+    year_cards = [{"year": y, "count": counts.get(y, 0)} for y in [1, 2, 3, 4]]
+  
+
+  
+    # inst is None for founder (or you can set label)
+  
+    return render_template(
+  
+        "admin/dashboard.html",
+  
+        inst=None,
+  
+        year_cards=year_cards,
+  
+        institutes=institutes,
+  
+        selected_inst=selected_inst,
+  
+        is_founder=True,
+  
+    )
+  
+
+  
+
+  
+# -----------------------------
+  
+# Add Student (NEW)
+  
+# -----------------------------
+  
+from flask import render_template, request, redirect, url_for, flash, session
+  
+from utils.db import get_db
+  
+from utils.decorators import admin_required
+  
+
+  
+# If you already have these helpers elsewhere, remove duplicates.
+  
+def to_int(v, default=0):
+  
+    try:
+  
+        return int(v)
+  
+    except Exception:
+  
+        return default
+  
+
+  
+def _only_digits(s: str) -> str:
+  
+    return "".join(ch for ch in (s or "") if ch.isdigit())
+  
+
+  
+def _dob_to_ddmmyyyy(dob_value) -> str:
+  
+    # expects YYYY-MM-DD from <input type="date">
+  
+    s = (dob_value or "").strip()
+  
+    if len(s) >= 10 and s[4] == "-" and s[7] == "-":
+  
+        yyyy, mm, dd = s[:4], s[5:7], s[8:10]
+  
+        return f"{dd}{mm}{yyyy}"
+  
+    digits = _only_digits(s)
+  
+    if len(digits) == 8 and digits.startswith(("19", "20")):
+  
+        yyyy, mm, dd = digits[:4], digits[4:6], digits[6:8]
+  
+        return f"{dd}{mm}{yyyy}"
+  
+    return digits
+  
+
+  
+def _require_hash_password():
+  
+    # adjust to your project’s hashing helper
+  
+    from werkzeug.security import generate_password_hash
+  
+    return generate_password_hash
+  
+
+  
+# Keep these consistent with your UI dropdowns
+  
+SCHOLARSHIPS = ["NONE", "GOVT", "SPORTS", "MERIT", "OTHER"]
+  
+QUOTAS = ["REGULAR", "MGMT", "NRI", "SPORTS", "OTHER"]
+  
+
+  
+def _fee_plan_exists(db, institute_id, course, year):
+  
+    row = db.execute(
+  
+        """
+  
+        SELECT 1
+  
+        FROM fee_plans
+  
+        WHERE institute_id=? AND course=? AND year=?
+  
+        LIMIT 1
+  
+        """,
+  
+        (institute_id, course, year),
+  
+    ).fetchone()
+  
+    return bool(row)
+  
+
+  
+def _insert_adjustment(db, student_id: int, category: str, label: str, amount: int):
+  
+    # only store non-zero
+  
+    if int(amount or 0) == 0:
+  
+        return
+  
+    db.execute(
+  
+        """
+  
+        INSERT INTO fee_adjustments (student_id, category, label, amount)
+  
+        VALUES (?, ?, ?, ?)
+  
+        """,
+  
+        (student_id, category, label, int(amount)),
+  
+    )
+  
+
+  
+from datetime import date
+  
+from flask import request, render_template, redirect, url_for, flash, session
+  
+from utils.audit import audit_log
+  
+from utils.db import get_db  # adjust to your get_db import
+  
+# from utils.helpers import to_int  # if you added helpers.py
+  
+# from your_auth_module import _require_hash_password, _dob_to_ddmmyyyy
+  
+
+  
+from datetime import date
+  
+from flask import request, render_template, redirect, url_for, flash, session
+  
+from utils.db import get_db
+  
+from utils.audit import audit_log
+  
+from utils.helpers import to_int
+  
+
+  
+FIRST_GRAD_DISCOUNT = 25000
+  
+
+  
+# ✅ add this 7.5 option in dropdown
+  
+SCHOLARSHIPS = ["NONE", "SC", "ST", "BC", "MBC", "OTHER"]
+  
+QUOTAS = ["REGULAR", "MGMT", "SPORTS", "NRI", "OTHER", "7.5 RESERVATION"]
+  
+
+  
+def _is_75(quota_type: str) -> bool:
+  
+    qt = (quota_type or "").strip().upper()
+  
+    return qt in {"7.5 RESERVATION", "7.5", "7.5%", "7_5", "RES7_5", "RESERVATION7_5", "75RES"}
+  
+
+  
+import os
+  
+from werkzeug.utils import secure_filename
+  
+
+  
+from pathlib import Path
+  
+from werkzeug.utils import secure_filename
+  
+from flask import current_app
+  
+
+  
+ALLOWED_PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+  
+
+  
+def _save_student_photo(file_storage, admission_no: str) -> str | None:
+  
+    """
+  
+    Save uploaded photo as ADMISSIONNO.ext under static/uploads/students/
+  
+    Returns stored filename or None.
+  
+    """
+  
+    if not file_storage or not getattr(file_storage, "filename", ""):
+  
+        return None
+  
+
+  
+    orig = secure_filename(file_storage.filename)
+  
+    ext = Path(orig).suffix.lower()
+  
+    if ext not in ALLOWED_PHOTO_EXTS:
+  
+        raise ValueError("Invalid photo type. Allowed: jpg, jpeg, png, webp")
+  
+
+  
+    filename = f"{admission_no}{ext}"
+  
+    upload_dir = Path(current_app.root_path) / "static" / "uploads" / "students"
+  
+    upload_dir.mkdir(parents=True, exist_ok=True)
+  
+
+  
+    save_path = upload_dir / filename
+  
+    file_storage.save(str(save_path))
+  
+    return filename
+  
+
+  
+
+  
+@admin_bp.route("/students/add", methods=["GET", "POST"])
+  
+@admin_required
+  
+def add_student():
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    course_rows = db.execute(
+  
+        "SELECT DISTINCT course FROM fee_plans WHERE institute_id=? ORDER BY course",
+  
+        (inst_id,),
+  
+    ).fetchall()
+  
+    course_options = [r["course"] for r in course_rows]
+  
+
+  
+    def has_fee_plan(course: str, year: int) -> bool:
+  
+        row = db.execute(
+  
+            "SELECT 1 FROM fee_plans WHERE institute_id=? AND course=? AND year=?",
+  
+            (inst_id, course, year),
+  
+        ).fetchone()
+  
+        return bool(row)
+  
+
+  
+    def upsert_adjustment(student_id: int, category: str, label: str, amount: int):
+  
+        db.execute(
+  
+            "DELETE FROM fee_adjustments WHERE student_id=? AND category=? AND label=?",
+  
+            (student_id, category, label),
+  
+        )
+  
+        amt = int(amount or 0)
+  
+        if amt != 0:
+  
+            db.execute(
+  
+                "INSERT INTO fee_adjustments (student_id, category, label, amount) VALUES (?,?,?,?)",
+  
+                (student_id, category, label, amt),
+  
+            )
+  
+
+  
+    if request.method == "POST":
+  
+        admission_no = (request.form.get("admission_no") or "").strip().upper()
+  
+        register_no = (request.form.get("register_no") or "").strip()
+  
+        name = (request.form.get("name") or "").strip()
+  
+        dob = (request.form.get("dob") or "").strip()
+  
+        year = to_int(request.form.get("year"), 0)
+  
+        class_ = (request.form.get("class") or "").strip().upper()
+  
+        course = (request.form.get("course") or "").strip()
+  
+
+  
+        student_email = (request.form.get("student_email") or "").strip()
+  
+        parent_email = (request.form.get("parent_email") or "").strip()
+  
+        student_phone = (request.form.get("student_phone") or "").strip()
+  
+        parent_phone = (request.form.get("parent_phone") or "").strip()
+  
+
+  
+        is_hosteller = 1 if str(request.form.get("is_hosteller", "0")) == "1" else 0
+  
+
+  
+        hostel_fee = to_int(request.form.get("hostel_fee"), 0)
+  
+        gym_fee = to_int(request.form.get("gym_fee"), 0)
+  
+        laundry_fee = to_int(request.form.get("laundry_fee"), 0)
+  
+        bus_fee = to_int(request.form.get("bus_fee"), 0)
+  
+        exam_fee = to_int(request.form.get("exam_fee"), 0)
+  
+
+  
+
+  
+        benefit_type = (request.form.get("benefit_type") or "NONE").strip().upper()
+  
+        scholarship_amount = to_int(request.form.get("scholarship_amount"), 0)
+  
+        quota_type = (request.form.get("quota_type") or "").strip().upper()
+  
+        quota_amount = to_int(request.form.get("quota_amount"), 0)
+  
+
+  
+        form = {
+  
+            "admission_no": admission_no,
+  
+            "register_no": register_no,
+  
+            "name": name,
+  
+            "dob": dob,
+  
+            "year": year,
+  
+            "class_": class_,
+  
+            "course": course,
+  
+            "student_email": student_email,
+  
+            "parent_email": parent_email,
+  
+            "student_phone": student_phone,
+  
+            "parent_phone": parent_phone,
+  
+            "is_hosteller": is_hosteller,
+  
+            "hostel_fee": hostel_fee,
+  
+            "gym_fee": gym_fee,
+  
+            "laundry_fee": laundry_fee,
+  
+            "bus_fee": bus_fee,
+  
+            "benefit_type": benefit_type,
+  
+            "scholarship_amount": scholarship_amount if scholarship_amount > 0 else "",
+  
+            "quota_type": quota_type,
+  
+            "quota_amount": quota_amount if quota_amount > 0 else "",
+  
+        }
+  
+
+  
+        if not admission_no or not name or not dob or year not in (1, 2, 3, 4) or not class_ or not course:
+  
+            flash("Fill all required fields (admission_no, name, dob, year, class, course).", "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+        dup_user = db.execute(
+  
+            "SELECT id FROM users WHERE username=? AND role='STUDENT' AND institute_id=?",
+  
+            (admission_no, inst_id),
+  
+        ).fetchone()
+  
+        if dup_user:
+  
+            flash("This admission number already has a login account.", "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+        dup_student = db.execute(
+  
+            "SELECT id FROM students WHERE admission_no=? AND institute_id=?",
+  
+            (admission_no, inst_id),
+  
+        ).fetchone()
+  
+        if dup_student:
+  
+            flash("This admission number already exists in students table.", "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+        # hostel vs bus enforcement
+  
+        if is_hosteller == 1:
+  
+            bus_fee = 0
+  
+        else:
+  
+            hostel_fee = 0
+  
+            gym_fee = 0
+  
+            laundry_fee = 0
+  
+
+  
+        # ✅ enforce ONE benefit
+  
+        is_first_graduate = 0
+  
+        student_quota_type = "REGULAR"
+  
+        discount_label = None
+  
+        discount_amount = 0  # negative number
+  
+
+  
+        if benefit_type == "NONE":
+  
+            pass
+  
+        elif benefit_type == "FIRST_GRADUATE":
+  
+            is_first_graduate = 1
+  
+        elif benefit_type == "RESERVATION_7_5":
+  
+            student_quota_type = "7.5 RESERVATION"
+  
+        elif benefit_type == "SCHOLARSHIP":
+  
+            if scholarship_amount <= 0:
+  
+                flash("Scholarship amount must be greater than 0.", "danger")
+  
+                return render_template(
+  
+                    "admin/add_student.html",
+  
+                    course_options=course_options,
+  
+                    form=form,
+  
+                    fee_plan_warning=not has_fee_plan(course, year),
+  
+                )
+  
+            discount_label = "Scholarship"
+  
+            discount_amount = -abs(int(scholarship_amount))
+  
+        elif benefit_type == "QUOTA":
+  
+            if not quota_type or quota_amount <= 0:
+  
+                flash("Quota type and amount are required.", "danger")
+  
+                return render_template(
+  
+                    "admin/add_student.html",
+  
+                    course_options=course_options,
+  
+                    form=form,
+  
+                    fee_plan_warning=not has_fee_plan(course, year),
+  
+                )
+  
+            discount_label = f"Quota ({quota_type})"
+  
+            discount_amount = -abs(int(quota_amount))
+  
+        else:
+  
+            flash("Invalid benefit selection.", "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+        # photo (optional)
+  
+        photo_filename = None
+  
+        try:
+  
+            photo_filename = _save_student_photo(request.files.get("photo"), admission_no)
+  
+        except Exception as e:
+  
+            flash(str(e), "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+        hp = _require_hash_password()
+  
+        raw_pwd = _dob_to_ddmmyyyy(dob)
+  
+        password_hash = hp(raw_pwd)
+  
+
+  
+        try:
+  
+            db.execute(
+  
+                "INSERT INTO users (username, password_hash, role, institute_id, is_active) VALUES (?, ?, 'STUDENT', ?, 1)",
+  
+                (admission_no, password_hash, inst_id),
+  
+            )
+  
+            user_id = db.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+  
+
+  
+            db.execute(
+  
+                """
+  
+                INSERT INTO students (
+  
+                    user_id, admission_no, register_no, name, dob, year, class, course,
+  
+                    student_email, parent_email, student_phone, parent_phone,
+  
+                    institute_id, photo_filename,
+  
+                    is_hosteller, quota_type, is_first_graduate,
+  
+                    is_active
+  
+                ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1)
+  
+                """,
+  
+                (
+  
+                    user_id, admission_no, (register_no or None), name, dob, year, class_, course,
+  
+                    (student_email or None), (parent_email or None),
+  
+                    (student_phone or None), (parent_phone or None),
+  
+                    inst_id, photo_filename,
+  
+                    is_hosteller, student_quota_type, is_first_graduate
+  
+                ),
+  
+            )
+  
+
+  
+            student_id = db.execute(
+  
+                "SELECT id FROM students WHERE user_id=? AND institute_id=?",
+  
+                (user_id, inst_id),
+  
+            ).fetchone()["id"]
+  
+
+  
+            # hostel/bus adjustments
+  
+            upsert_adjustment(student_id, "HOSTEL", "Hostel Fee", hostel_fee)
+  
+            upsert_adjustment(student_id, "GYM", "Gym Fee", gym_fee)
+  
+            upsert_adjustment(student_id, "LAUNDRY", "Laundry Fee", laundry_fee)
+  
+            upsert_adjustment(student_id, "BUS", "Bus Fee", bus_fee)
+  
+            upsert_adjustment(student_id, "EXAM", "Exam Fee", exam_fee)
+  
+
+  
+
+  
+            # discount adjustment (ONLY ONE)
+  
+            if discount_label and discount_amount != 0:
+  
+                upsert_adjustment(student_id, "DISCOUNT", discount_label, discount_amount)
+  
+
+  
+            audit_log(
+  
+                db,
+  
+                action="STUDENT_CREATED",
+  
+                entity_type="student",
+  
+                entity_id=student_id,
+  
+                details={"admission_no": admission_no, "name": name, "benefit": benefit_type},
+  
+            )
+  
+
+  
+            db.commit()
+  
+            flash("Student added successfully.", "success")
+  
+            return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+        except Exception as e:
+  
+            db.rollback()
+  
+            print("❌ Add student failed:", repr(e))
+  
+            flash("Add student failed. Check server logs.", "danger")
+  
+            return render_template(
+  
+                "admin/add_student.html",
+  
+                course_options=course_options,
+  
+                form=form,
+  
+                fee_plan_warning=not has_fee_plan(course, year),
+  
+            )
+  
+
+  
+    return render_template(
+  
+        "admin/add_student.html",
+  
+        course_options=course_options,
+  
+        form=None,
+  
+        fee_plan_warning=False
+  
+    )
+  
+
+  
+
+  
+# -----------------------------
+  
+# Year > Classes > Students
+  
+# -----------------------------
+  
+@admin_bp.get("/year/<int:year>/classes")
+  
+@admin_required
+  
+def classes(year):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    rows = db.execute(
+  
+        """
+  
+        SELECT class, COUNT(*) AS c
+  
+        FROM students
+  
+        WHERE institute_id=? AND year=? AND COALESCE(is_active,1)=1
+  
+        GROUP BY class
+  
+        ORDER BY class
+  
+        """,
+  
+        (inst_id, year),
+  
+    ).fetchall()
+  
+
+  
+    classes_list = [{"class": r["class"], "count": r["c"]} for r in rows]
+  
+    return render_template("admin/classes.html", year=year, classes=classes_list)
+  
+
+  
+
+  
+@admin_bp.get("/year/<int:year>/class/<cls>/students")
+  
+@admin_required
+  
+def students(year, cls):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    q = (request.args.get("q") or "").strip()
+  
+    sort = request.args.get("sort", "admission")
+  
+    order = request.args.get("order", "asc")
+  
+
+  
+    sort_map = {"admission": "admission_no", "name": "name", "regno": "register_no"}
+  
+    sort_col = sort_map.get(sort, "admission_no")
+  
+    sort_dir = "DESC" if order.lower() == "desc" else "ASC"
+  
+
+  
+    params = [inst_id, year, cls]
+  
+    where = "WHERE institute_id=? AND year=? AND class=? AND COALESCE(is_active,1)=1"
+  
+
+  
+    if q:
+  
+        where += " AND (admission_no LIKE ? OR name LIKE ? OR COALESCE(register_no,'') LIKE ?)"
+  
+        like = f"%{q}%"
+  
+        params.extend([like, like, like])
+  
+
+  
+    sql = f"""
+  
+        SELECT id, name, admission_no, register_no, class, year, COALESCE(is_active,1) AS is_active
+  
+        FROM students
+  
+        {where}
+  
+        ORDER BY {sort_col} {sort_dir}
+  
+    """
+  
+    students_rows = db.execute(sql, params).fetchall()
+  
+
+  
+    return render_template(
+  
+        "admin/students.html",
+  
+        year=year,
+  
+        cls=cls,
+  
+        students=students_rows,
+  
+        q=q,
+  
+        sort=sort,
+  
+        order=order,
+  
+    )
+  
+
+  
+
+  
+# -----------------------------
+  
+# Student View
+  
+# -----------------------------
+  
+from utils.fees import get_fee_state_for_student
+  
+
+  
+@admin_bp.get("/student/<int:student_id>")
+  
+@admin_required
+  
+def student_view(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    student = db.execute(
+  
+        """
+  
+        SELECT id, user_id, name, admission_no, register_no, dob, year, class, course,
+  
+               student_phone, parent_phone, student_email, parent_email,
+  
+               institute_id, photo_filename,
+  
+               COALESCE(is_active,1) AS is_active
+  
+        FROM students
+  
+        WHERE id=? AND institute_id=?
+  
+        """,
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not student:
+  
+        flash("Student not found for your institute.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    inst = db.execute(
+  
+        "SELECT short_name, full_name FROM institutes WHERE id=?",
+  
+        (student["institute_id"],),
+  
+    ).fetchone()
+  
+
+  
+    # Fee engine state
+  
+    fee_state = get_fee_state_for_student(db, student_id=student["id"])
+  
+    if not fee_state:
+  
+        fee_state = {"ok": False, "error": "Fee state not available."}
+  
+
+  
+    # Payments list
+  
+    payments = db.execute(
+  
+        """
+  
+        SELECT txn_id, category, amount, method, status, created_at
+  
+        FROM payments
+  
+        WHERE student_id=?
+  
+        ORDER BY id DESC
+  
+        """,
+  
+        (student["id"],),
+  
+    ).fetchall()
+  
+
+  
+    # ✅ ALL adjustments (if you still want)
+  
+    adjustments = db.execute(
+  
+        """
+  
+        SELECT category, label, amount, created_at
+  
+        FROM fee_adjustments
+  
+        WHERE student_id=?
+  
+        ORDER BY id DESC
+  
+        """,
+  
+        (student["id"],),
+  
+    ).fetchall()
+  
+
+  
+    # ✅ FINES ONLY (case-insensitive)
+  
+    fine_rows = db.execute(
+  
+        """
+  
+        SELECT label, amount, created_at
+  
+        FROM fee_adjustments
+  
+        WHERE student_id=?
+  
+          AND UPPER(category)='FINE'
+  
+        ORDER BY id DESC
+  
+        """,
+  
+        (student["id"],),
+  
+    ).fetchall()
+  
+
+  
+    photo_url = (
+  
+        url_for("static", filename=f"uploads/students/{student['photo_filename']}")
+  
+        if student["photo_filename"]
+  
+        else url_for("static", filename="uploads/students/default_student.png")
+  
+    )
+  
+
+  
+    return render_template(
+  
+        "admin/student_view.html",
+  
+        student=student,
+  
+        inst=inst,
+  
+        photo_url=photo_url,
+  
+        payments=payments,
+  
+        adjustments=adjustments,
+  
+        fine_rows=fine_rows,     # ✅ IMPORTANT
+  
+        fee_state=fee_state,
+  
+    )
+  
+
+  
+
+  
+# -----------------------------
+  
+# Soft Delete / Restore (NEW)
+  
+# -----------------------------
+  
+@admin_bp.post("/student/<int:student_id>/remove")
+  
+@admin_required
+  
+def remove_student(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    s = db.execute(
+  
+        "SELECT id, user_id FROM students WHERE id=? AND institute_id=?",
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not s:
+  
+        flash("Student not found.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    try:
+  
+        db.execute("UPDATE students SET is_active=0 WHERE id=? AND institute_id=?", (student_id, inst_id))
+  
+        if s["user_id"]:
+  
+            db.execute("UPDATE users SET is_active=0 WHERE id=? AND institute_id=?", (s["user_id"], inst_id))
+  
+        db.commit()
+  
+        flash("Student disabled (soft deleted).", "success")
+  
+    except Exception as e:
+  
+        db.rollback()
+  
+        print("❌ remove_student failed:", repr(e))
+  
+        flash("Failed to disable student.", "danger")
+  
+
+  
+    return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+
+  
+@admin_bp.post("/student/<int:student_id>/restore")
+  
+@admin_required
+  
+def restore_student(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    s = db.execute(
+  
+        "SELECT id, user_id FROM students WHERE id=? AND institute_id=?",
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not s:
+  
+        flash("Student not found.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    try:
+  
+        db.execute("UPDATE students SET is_active=1 WHERE id=? AND institute_id=?", (student_id, inst_id))
+  
+        if s["user_id"]:
+  
+            db.execute("UPDATE users SET is_active=1 WHERE id=? AND institute_id=?", (s["user_id"], inst_id))
+  
+        db.commit()
+  
+        flash("Student restored.", "success")
+  
+    except Exception as e:
+  
+        db.rollback()
+  
+        print("❌ restore_student failed:", repr(e))
+  
+        flash("Failed to restore student.", "danger")
+  
+
+  
+    return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+
+  
+# -----------------------------
+  
+# Reset Payments
+  
+# -----------------------------
+  
+@admin_bp.post("/student/<int:student_id>/reset-payments")
+  
+@admin_required
+  
+def reset_payments(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    ok = db.execute(
+  
+        "SELECT id FROM students WHERE id=? AND institute_id=?",
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not ok:
+  
+        flash("Student not found.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    try:
+  
+        db.execute(
+  
+            "DELETE FROM receipts WHERE payment_id IN (SELECT id FROM payments WHERE student_id=?)",
+  
+            (student_id,),
+  
+        )
+  
+    except Exception:
+  
+        pass
+  
+
+  
+    db.execute("DELETE FROM payments WHERE student_id=?", (student_id,))
+  
+    db.commit()
+  
+
+  
+    flash("All payments cleared (demo reset).", "success")
+  
+    return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+
+  
+# -----------------------------
+  
+# Add Fine
+  
+# -----------------------------
+  
+from datetime import datetime
+  
+import uuid
+  
+from flask import request, session, flash, redirect, url_for
+  
+
+  
+
+  
+
+  
+@admin_bp.post("/student/<int:student_id>/fine")
+  
+@admin_required
+  
+def add_fine(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    ok = db.execute(
+  
+        "SELECT id FROM students WHERE id=? AND institute_id=?",
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not ok:
+  
+        flash("Student not found.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    label = (request.form.get("fine_label") or "").strip()
+    # The following code block is intended for an 'edit_student' route,
+    # which is not present in the provided document.
+    # Inserting it here would cause a syntax error due to undefined variables
+    # like 'updates', 'params', 'admission_no', 'current_app', and 'os'.
+    # To maintain syntactic correctness and fulfill the request as closely as possible,
+    # this block is added as a comment.
+    # if "photo" in request.files:
+    #     f = request.files["photo"]
+    #     if f and f.filename:
+    #         ext = f.filename.rsplit(".", 1)[-1].lower()
+    #         if ext in ["jpg", "jpeg", "png", "webp"]:
+    #             fname = f"{admission_no}.{ext}"
+    #             dest = os.path.join(current_app.config["STUDENT_PHOTO_FOLDER"], fname)
+    #             f.save(dest)
+    #             updates.append("photo_filename=?")
+    #             params.append(fname)
+    #
+    # if not updates:
+    #     flash("No changes detected.", "info")
+    #     return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    if amount <= 0:
+  
+        flash("Fine amount must be > 0.", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    # Store fine as adjustment
+  
+    upsert_adjustment(db, student_id, "FINE", label, amount)
+  
+    db.commit()
+  
+
+  
+    flash(f"Fine added (₹{amount:,}).", "success")
+  
+    return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+# -----------------------------
+  
+# Cash Counter Payment
+  
+# -----------------------------
+  
+from datetime import datetime
+  
+import uuid
+  
+from io import BytesIO
+  
+from flask import flash, redirect, url_for, session, request
+  
+from utils.mailer import send_receipt_email  # must exist
+  
+# make sure _receipt_no and _build_receipt_pdf_bytes exist in scope
+  
+
+  
+@admin_bp.post("/student/<int:student_id>/cash-pay")
+  
+@admin_required
+  
+def admin_cash_pay(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    # Pull full student (need emails + details for receipt)
+  
+    s = db.execute(
+  
+        """
+  
+        SELECT id, institute_id, name, admission_no, register_no, year, class,
+  
+               student_email, parent_email
+  
+        FROM students
+  
+        WHERE id=? AND institute_id=?
+  
+        """,
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not s:
+  
+        flash("Student not found.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    category = (request.form.get("category") or "").strip().upper()
+  
+    amount = to_int(request.form.get("cash_amount"), 0)
+  
+
+  
+    if amount <= 0:
+  
+        flash("Amount must be greater than 0.", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    fee_state = get_fee_state_for_student(db, student_id=student_id)
+  
+    if not fee_state or not fee_state.get("ok"):
+  
+        flash("Fee state error. Check fee plan/course mapping.", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    category_due = fee_state.get("due", {})  # ✅ your fees engine returns 'due' dict
+  
+    if not isinstance(category_due, dict) or category not in category_due:
+  
+        flash("Invalid fee category.", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    due = int(category_due.get(category, 0) or 0)
+  
+    if due <= 0:
+  
+        flash(f"No due for {category}.", "warning")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    if amount > due:
+  
+        flash(f"Amount exceeds due for {category} (₹{due:,}).", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    txn_id = f"CASH-{datetime.now().strftime('%Y%m%d')}-{uuid.uuid4().hex[:6].upper()}"
+  
+
+  
+    try:
+  
+        db.execute(
+  
+            """
+  
+            INSERT INTO payments (student_id, txn_id, category, amount, method, status)
+  
+            VALUES (?, ?, ?, ?, 'CASH_COUNTER', 'SUCCESS')
+  
+            """,
+  
+            (student_id, txn_id, category, amount),
+  
+        )
+  
+        db.commit()
+  
+    except Exception as e:
+  
+        db.rollback()
+  
+        print("❌ Cash payment insert failed:", repr(e))
+  
+        flash("Failed to record cash payment. Check server logs.", "danger")
+  
+        return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+    # --- Build receipt + send email (do NOT rollback payment if email fails) ---
+  
+    inst = db.execute(
+  
+        "SELECT short_name, full_name FROM institutes WHERE id=?",
+  
+        (inst_id,),
+  
+    ).fetchone()
+  
+
+  
+    receipt_no = _receipt_no(txn_id)
+  
+
+  
+    payment_obj = {
+  
+        "txn_id": txn_id,
+  
+        "category": category,
+  
+        "amount": amount,
+  
+        "method": "CASH_COUNTER",
+  
+        "status": "SUCCESS",
+  
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+  
+    }
+  
+
+  
+    pdf_bytes = _build_receipt_pdf_bytes(s, inst, payment_obj, receipt_no)
+  
+
+  
+    subject = f"Fee Receipt - {receipt_no}"
+  
+    body = (
+  
+        f"Hello {s['name']},\n\n"
+  
+        f"Your cash payment was recorded successfully.\n\n"
+  
+        f"Receipt No: {receipt_no}\n"
+  
+        f"Transaction ID: {txn_id}\n"
+  
+        f"Category: {category}\n"
+  
+        f"Amount Paid: ₹{amount:,}\n"
+  
+        f"Method: CASH_COUNTER\n\n"
+  
+        f"Regards,\n{inst['full_name'] if inst else 'Institution'}\n"
+  
+    )
+  
+
+  
+    recipients = []
+  
+    if (s["student_email"] or "").strip():
+  
+        recipients.append(s["student_email"].strip())
+  
+    if (s["parent_email"] or "").strip():
+  
+        recipients.append(s["parent_email"].strip())
+  
+
+  
+    sent = 0
+  
+    for to_email in recipients:
+  
+        try:
+  
+            send_receipt_email(to_email, subject, body, pdf_bytes, f"{receipt_no}.pdf")
+  
+            sent += 1
+  
+        except Exception as e:
+  
+            print("❌ Cash receipt email failed:", to_email, "|", repr(e))
+  
+
+  
+    if recipients and sent == 0:
+  
+        flash(f"Cash payment recorded for {category} (₹{amount:,}). Email failed.", "warning")
+  
+    elif recipients and sent > 0:
+  
+        flash(f"Cash payment recorded for {category} (₹{amount:,}). Receipt emailed.", "success")
+  
+    else:
+  
+        flash(f"Cash payment recorded for {category} (₹{amount:,}). No email on file.", "success")
+  
+
+  
+    return redirect(url_for("admin.student_view", student_id=student_id))
+  
+# -----------------------------
+  
+# Fee Settings
+  
+# -----------------------------
+  
+from flask import render_template, request, redirect, url_for, flash, session
+  
+from utils.db import get_db
+  
+from utils.decorators import admin_required
+  
+
+  
+# put these near the top of admin/routes.py
+  
+SCHOLARSHIPS = ["NONE", "SC", "ST", "BC", "MBC", "OTHER"]
+  
+QUOTAS = ["REGULAR", "MGMT", "SPORTS", "NCC", "OTHER"]
+  
+
+  
+FIRST_GRAD_DISCOUNT = 25000  # ₹25,000
+  
+
+  
+
+  
+def to_int(v, default=0):
+  
+    try:
+  
+        return int(v)
+  
+    except Exception:
+  
+        return default
+  
+
+  
+
+  
+def upsert_adjustment(db, student_id: int, category: str, label: str, amount: int):
+  
+    """
+  
+    Update if exists else insert. Uniqueness is by (student_id, category, label).
+  
+    """
+  
+    row = db.execute(
+  
+        """
+  
+        SELECT id
+  
+        FROM fee_adjustments
+  
+        WHERE student_id=? AND category=? AND label=?
+  
+        """,
+  
+        (student_id, category, label),
+  
+    ).fetchone()
+  
+
+  
+    if row:
+  
+        db.execute(
+  
+            "UPDATE fee_adjustments SET amount=? WHERE id=?",
+  
+            (amount, row["id"]),
+  
+        )
+  
+    else:
+  
+        db.execute(
+  
+            """
+  
+            INSERT INTO fee_adjustments (student_id, category, label, amount)
+  
+            VALUES (?, ?, ?, ?)
+  
+            """,
+  
+            (student_id, category, label, amount),
+  
+        )
+  
+
+  
+
+  
+def delete_adjustment(db, student_id: int, category: str, label: str | None = None):
+  
+    if label:
+  
+        db.execute(
+  
+            "DELETE FROM fee_adjustments WHERE student_id=? AND category=? AND label=?",
+  
+            (student_id, category, label),
+  
+        )
+  
+    else:
+  
+        db.execute(
+  
+            "DELETE FROM fee_adjustments WHERE student_id=? AND category=?",
+  
+            (student_id, category),
+  
+        )
+  
+
+  
+
+  
+from utils.audit import audit_log
+  
+from utils.db import get_db
+  
+from utils.helpers import to_int
+  
+
+  
+from datetime import date
+  
+from flask import request, render_template, redirect, url_for, flash, session
+  
+from utils.audit import audit_log
+  
+from utils.db import get_db  # adjust import
+  
+
+  
+FIRST_GRAD_DISCOUNT = 25000
+  
+
+  
+from flask import request, render_template, redirect, url_for, flash, session
+  
+from utils.db import get_db
+  
+from utils.audit import audit_log
+  
+from utils.helpers import to_int
+  
+from utils.fees import get_fee_state_for_student
+  
+
+  
+FIRST_GRAD_DISCOUNT = 25000
+  
+
+  
+SCHOLARSHIPS = ["NONE", "SC", "ST", "BC", "MBC", "OTHER"]
+  
+QUOTAS = ["REGULAR", "MGMT", "SPORTS", "NRI", "OTHER", "7.5 RESERVATION"]
+  
+
+  
+def _is_75(quota_type: str) -> bool:
+  
+    qt = (quota_type or "").strip().upper()
+  
+    return qt in {"7.5 RESERVATION", "7.5", "7.5%", "7_5", "RES7_5", "RESERVATION7_5", "75RES"}
+  
+
+  
+
+  
+
+  
+# -----------------------------
+  
+# Admin Receipt PDF
+  
+# -----------------------------
+  
+from io import BytesIO
+  
+from flask import send_file, flash, redirect, url_for, session
+  
+from datetime import datetime
+  
+
+  
+@admin_bp.get("/receipt/<txn_id>.pdf")
+  
+@admin_required
+  
+def admin_receipt_pdf(txn_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    # 1) Get payment + student in one go (and validate institute ownership)
+  
+    row = db.execute(
+  
+        """
+  
+        SELECT
+  
+          p.id            AS payment_id,
+  
+          p.txn_id,
+  
+          p.student_id,
+  
+          p.category,
+  
+          p.amount,
+  
+          p.method,
+  
+          p.status,
+  
+          p.created_at,
+  
+
+  
+          s.name,
+  
+          s.admission_no,
+  
+          s.register_no,
+  
+          s.year,
+  
+          s.class,
+  
+          s.institute_id,
+  
+          s.student_email,
+  
+          s.parent_email
+  
+        FROM payments p
+  
+        JOIN students s ON s.id = p.student_id
+  
+        WHERE p.txn_id = ?
+  
+          AND s.institute_id = ?
+  
+        """,
+  
+        (txn_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not row:
+  
+        flash("Receipt not found (or unauthorized).", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    if row["status"] != "SUCCESS":
+  
+        flash("Receipt available only for successful payments.", "warning")
+  
+        return redirect(url_for("admin.student_view", student_id=row["student_id"]))
+  
+
+  
+    # 2) Ensure receipt record exists and use stored receipt_no
+  
+    r = db.execute(
+  
+        "SELECT receipt_no FROM receipts WHERE payment_id=?",
+  
+        (row["payment_id"],),
+  
+    ).fetchone()
+  
+
+  
+    if not r:
+  
+        receipt_no = _receipt_no(row["txn_id"])  # stable format you already use
+  
+
+  
+        try:
+  
+            db.execute(
+  
+                "INSERT INTO receipts (receipt_no, payment_id) VALUES (?, ?)",
+  
+                (receipt_no, row["payment_id"]),
+  
+            )
+  
+            db.commit()
+  
+        except Exception as e:
+  
+            db.rollback()
+  
+            # If duplicate happened due to race, re-fetch safely
+  
+            r2 = db.execute(
+  
+                "SELECT receipt_no FROM receipts WHERE payment_id=?",
+  
+                (row["payment_id"],),
+  
+            ).fetchone()
+  
+            if not r2:
+  
+                print("❌ Receipt insert failed:", repr(e))
+  
+                flash("Receipt generation failed. Check server logs.", "danger")
+  
+                return redirect(url_for("admin.student_view", student_id=row["student_id"]))
+  
+            receipt_no = r2["receipt_no"]
+  
+    else:
+  
+        receipt_no = r["receipt_no"]
+  
+
+  
+    # 3) Institute row for PDF header
+  
+    inst = db.execute(
+  
+        "SELECT short_name, full_name FROM institutes WHERE id=?",
+  
+        (row["institute_id"],),
+  
+    ).fetchone()
+  
+
+  
+    # 4) Build PDF (your helper expects dict-like rows; sqlite3.Row works fine)
+  
+    pdf_bytes = _build_receipt_pdf_bytes(row, inst, row, receipt_no)
+  
+
+  
+    return send_file(
+  
+        BytesIO(pdf_bytes),
+  
+        as_attachment=True,
+  
+        download_name=f"{receipt_no}.pdf",
+  
+        mimetype="application/pdf",
+  
+    )
+  
+
+  
+from flask import render_template, request, session
+  
+from utils.db import get_db
+  
+from utils.decorators import admin_required
+  
+from datetime import date
+  
+
+  
+from flask import request, render_template, session
+  
+from utils.db import get_db
+  
+from utils.decorators import admin_required
+  
+
+  
+@admin_bp.route("/audit-logs", methods=["GET"])
+@admin_required
+def audit_logs():
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    q = (request.args.get("q") or "").strip()
+  
+    day = (request.args.get("day") or "").strip()  # YYYY-MM-DD
+  
+
+  
+    where = ["al.institute_id = ?"]
+  
+    params = [inst_id]
+  
+
+  
+    if day:
+  
+        where.append("date(al.created_at) = date(?)")
+  
+        params.append(day)
+  
+
+  
+    if q:
+  
+        like = f"%{q}%"
+  
+        where.append("""
+  
+          (
+  
+            al.action LIKE ?
+  
+            OR al.entity_type LIKE ?
+  
+            OR CAST(al.entity_id AS TEXT) LIKE ?
+  
+            OR IFNULL(u.username,'') LIKE ?
+  
+            OR IFNULL(s.admission_no,'') LIKE ?
+  
+            OR IFNULL(s.name,'') LIKE ?
+  
+            OR IFNULL(al.details,'') LIKE ?
+  
+          )
+  
+        """)
+  
+        params += [like, like, like, like, like, like, like]
+  
+
+  
+    action = (request.args.get("action") or "").strip()
+    if action:
+        where.append("al.action = ?")
+        params.append(action)
+
+    where_sql = " AND ".join(where)
+  
+
+  
+    rows = db.execute(
+  
+        f"""
+  
+        SELECT
+  
+          al.id,
+  
+          al.created_at,
+  
+          al.action,
+  
+          al.entity_type,
+  
+          al.entity_id,
+  
+          al.details AS details_json,
+  
+          u.username AS admin_username,
+  
+          s.admission_no AS student_adm,
+  
+          s.name AS student_name
+  
+        FROM audit_logs al
+  
+        LEFT JOIN users u ON u.id = al.actor_user_id
+  
+        LEFT JOIN students s ON s.id = al.entity_id AND al.entity_type='student'
+  
+        WHERE {where_sql}
+  
+        ORDER BY al.id DESC
+  
+        LIMIT 300
+  
+        """,
+  
+        params
+  
+    ).fetchall()
+  
+
+  
+    # distinct actions
+    actions_rows = db.execute("SELECT DISTINCT action FROM audit_logs WHERE institute_id=? ORDER BY action", (inst_id,)).fetchall()
+    actions = [r["action"] for r in actions_rows]
+
+    return render_template(
+        "admin/audit_logs.html",
+        logs=rows,
+        actions=actions,
+        q=q,
+        day=day
+    )
+  
+
+  
+
+  
+from datetime import date
+  
+from flask import request, render_template, session
+  
+from utils.db import get_db
+  
+from utils.decorators import admin_required
+  
+
+  
+from datetime import date
+  
+
+  
+from datetime import date
+  
+
+  
+@admin_bp.route("/reports/daily", methods=["GET"])
+  
+@admin_required
+  
+def daily_fees_summary():
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    day = (request.args.get("day") or "").strip()  # YYYY-MM-DD
+  
+    if not day:
+  
+        day = date.today().isoformat()
+  
+
+  
+    q = (request.args.get("q") or "").strip()
+  
+
+  
+    where = [
+  
+        "s.institute_id = ?",
+  
+        "p.status = 'SUCCESS'",
+  
+        "date(p.created_at) = date(?)"
+  
+    ]
+  
+    params = [inst_id, day]
+  
+
+  
+    if q:
+  
+        where.append("(s.admission_no LIKE ? OR s.name LIKE ?)")
+  
+        like = f"%{q}%"
+  
+        params += [like, like]
+  
+
+  
+    where_sql = " AND ".join(where)
+  
+
+  
+    # totals by category
+  
+    totals = db.execute(
+  
+        f"""
+  
+        SELECT
+  
+          p.category,
+  
+          COALESCE(SUM(p.amount), 0) AS total
+  
+        FROM payments p
+  
+        JOIN students s ON s.id = p.student_id
+  
+        WHERE {where_sql}
+  
+        GROUP BY p.category
+  
+        ORDER BY total DESC
+  
+        """,
+  
+        params
+  
+    ).fetchall()
+  
+
+  
+    # ✅ NEW: totals by method split (cash vs online)
+  
+    split = db.execute(
+  
+        f"""
+  
+        SELECT
+  
+          COALESCE(SUM(CASE WHEN p.method = 'CASH_COUNTER' THEN p.amount ELSE 0 END), 0) AS cash_total,
+  
+          COALESCE(SUM(CASE WHEN p.method <> 'CASH_COUNTER' THEN p.amount ELSE 0 END), 0) AS online_total
+  
+        FROM payments p
+  
+        JOIN students s ON s.id = p.student_id
+  
+        WHERE {where_sql}
+  
+        """,
+  
+        params
+  
+    ).fetchone()
+  
+
+  
+    cash_total = int((split["cash_total"] if split else 0) or 0)
+  
+    online_total = int((split["online_total"] if split else 0) or 0)
+  
+
+  
+    # transaction list (include method so you can show it)
+  
+    tx = db.execute(
+  
+        f"""
+  
+        SELECT
+  
+          p.id,
+  
+          p.created_at,
+  
+          p.student_id,
+  
+          s.admission_no,
+  
+          s.name,
+  
+          p.category,
+  
+          p.amount,
+  
+          p.txn_id,
+  
+          p.method
+  
+        FROM payments p
+  
+        JOIN students s ON s.id = p.student_id
+  
+        WHERE {where_sql}
+  
+        ORDER BY p.id DESC
+  
+        LIMIT 400
+  
+        """,
+  
+        params
+  
+    ).fetchall()
+  
+
+  
+    grand_total = sum(int(r["total"] or 0) for r in totals)
+  
+
+  
+    return render_template(
+  
+        "admin/daily_summary.html",
+  
+        day=day,
+  
+        q=q,
+  
+        totals=totals,
+  
+        tx=tx,
+  
+        grand_total=grand_total,
+  
+        cash_total=cash_total,       # ✅ NEW
+  
+        online_total=online_total,   # ✅ NEW
+  
+    )
+  
+
+  
+import os
+  
+from werkzeug.utils import secure_filename
+  
+
+  
+from pathlib import Path
+  
+from werkzeug.utils import secure_filename
+  
+from flask import current_app
+  
+
+  
+ALLOWED_PHOTO_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
+  
+
+  
+def _save_student_photo(file_storage, admission_no: str) -> str | None:
+  
+    if not file_storage or not getattr(file_storage, "filename", ""):
+  
+        return None
+  
+
+  
+    orig = secure_filename(file_storage.filename)
+  
+    ext = Path(orig).suffix.lower()
+  
+
+  
+    if ext not in ALLOWED_PHOTO_EXTS:
+  
+        raise ValueError("Invalid photo type. Allowed: jpg, jpeg, png, webp")
+  
+
+  
+    filename = f"{admission_no}{ext}"
+  
+
+  
+    upload_dir = Path(current_app.root_path) / "static" / "uploads" / "students"
+  
+    upload_dir.mkdir(parents=True, exist_ok=True)
+  
+
+  
+    save_path = upload_dir / filename
+  
+    file_storage.save(str(save_path))
+  
+    return filename
+  
+
+  
+
+  
+@admin_bp.route("/students/<int:student_id>/edit", methods=["GET", "POST"])
+  
+@admin_required
+  
+def edit_student(student_id):
+  
+    db = get_db()
+  
+    inst_id = session["institute_id"]
+  
+
+  
+    student = db.execute(
+  
+        """
+  
+        SELECT id, user_id, admission_no, register_no, name, dob, year, class, course,
+  
+               student_email, parent_email, student_phone, parent_phone,
+  
+               institute_id, is_hosteller, photo_filename
+  
+        FROM students
+  
+        WHERE id=? AND institute_id=?
+  
+        """,
+  
+        (student_id, inst_id),
+  
+    ).fetchone()
+  
+
+  
+    if not student:
+  
+        flash("Student not found for your institute.", "danger")
+  
+        return redirect(url_for("admin.dashboard"))
+  
+
+  
+    # dropdown courses
+  
+    course_rows = db.execute(
+  
+        "SELECT DISTINCT course FROM fee_plans WHERE institute_id=? ORDER BY course",
+  
+        (inst_id,),
+  
+    ).fetchall()
+  
+    course_options = [r["course"] for r in course_rows]
+  
+
+  
+    def has_fee_plan(course: str, year: int) -> bool:
+  
+        row = db.execute(
+  
+            "SELECT 1 FROM fee_plans WHERE institute_id=? AND course=? AND year=?",
+  
+            (inst_id, course, year),
+  
+        ).fetchone()
+  
+        return bool(row)
+  
+
+  
+    # adjustments helpers
+  
+    def _get_adj(label, category):
+  
+        r = db.execute(
+  
+            "SELECT amount FROM fee_adjustments WHERE student_id=? AND category=? AND label=?",
+  
+            (student_id, category, label),
+  
+        ).fetchone()
+  
+        return int(r["amount"]) if r else 0
+  
+
+  
+    def upsert_adjustment(student_id: int, category: str, label: str, amount: int):
+  
+        db.execute(
+  
+            "DELETE FROM fee_adjustments WHERE student_id=? AND category=? AND label=?",
+  
+            (student_id, category, label),
+  
+        )
+  
+        amt = int(amount or 0)
+  
+        if amt != 0:
+  
+            db.execute(
+  
+                "INSERT INTO fee_adjustments (student_id, category, label, amount) VALUES (?,?,?,?)",
+  
+                (student_id, category, label, amt),
+  
+            )
+  
+
+  
+    if request.method == "POST":
+  
+        admission_no = student["admission_no"]  # locked
+  
+
+  
+        register_no = (request.form.get("register_no") or "").strip()
+  
+        name = (request.form.get("name") or "").strip()
+  
+        dob = (request.form.get("dob") or "").strip()
+  
+        year = to_int(request.form.get("year"), 0)
+  
+        class_ = (request.form.get("class") or "").strip().upper()
+  
+        course = (request.form.get("course") or "").strip()
+  
+
+  
+        student_email = (request.form.get("student_email") or "").strip()
+  
+        parent_email = (request.form.get("parent_email") or "").strip()
+  
+        student_phone = (request.form.get("student_phone") or "").strip()
+  
+        parent_phone = (request.form.get("parent_phone") or "").strip()
+  
+
+  
+        is_hosteller = 1 if str(request.form.get("is_hosteller", "0")) == "1" else 0
+  
+
+  
+        # ✅ READ EXAM FEE (THIS WAS MISSING)
+  
+        exam_fee = to_int(request.form.get("exam_fee"), 0)
+  
+
+  
+        hostel_fee = to_int(request.form.get("hostel_fee"), 0)
+  
+        gym_fee = to_int(request.form.get("gym_fee"), 0)
+  
+        laundry_fee = to_int(request.form.get("laundry_fee"), 0)
+  
+        bus_fee = to_int(request.form.get("bus_fee"), 0)
+  
+
+  
+        # validate required
+  
+        if not name or not dob or year not in (1, 2, 3, 4) or not class_ or not course:
+  
+            flash("Fill all required fields (name, dob, year, class, course).", "danger")
+  
+            return redirect(url_for("admin.edit_student", student_id=student_id))
+  
+
+  
+        # hostel vs bus enforcement
+  
+        if is_hosteller == 1:
+  
+            bus_fee = 0
+  
+        else:
+  
+            hostel_fee = 0
+  
+            gym_fee = 0
+  
+            laundry_fee = 0
+  
+
+  
+        # photo replace
+  
+        photo_filename = student["photo_filename"]
+  
+        try:
+  
+            new_photo = _save_student_photo(request.files.get("photo"), admission_no)
+  
+            if new_photo:
+  
+                photo_filename = new_photo
+  
+        except Exception as e:
+  
+            flash(str(e), "danger")
+  
+            return redirect(url_for("admin.edit_student", student_id=student_id))
+  
+
+  
+        try:
+  
+            db.execute(
+  
+                """
+  
+                UPDATE students
+  
+                SET register_no=?,
+  
+                    name=?,
+  
+                    dob=?,
+  
+                    year=?,
+  
+                    class=?,
+  
+                    course=?,
+  
+                    student_email=?,
+  
+                    parent_email=?,
+  
+                    student_phone=?,
+  
+                    parent_phone=?,
+  
+                    is_hosteller=?,
+  
+                    photo_filename=?
+  
+                WHERE id=? AND institute_id=?
+  
+                """,
+  
+                (
+  
+                    (register_no or None),
+  
+                    name,
+  
+                    dob,
+  
+                    year,
+  
+                    class_,
+  
+                    course,
+  
+                    (student_email or None),
+  
+                    (parent_email or None),
+  
+                    (student_phone or None),
+  
+                    (parent_phone or None),
+  
+                    is_hosteller,
+  
+                    photo_filename,
+  
+                    student_id,
+  
+                    inst_id,
+  
+                ),
+  
+            )
+  
+
+  
+            # DOB changed => reset login password
+  
+            if dob != (student["dob"] or ""):
+  
+                hp = _require_hash_password()
+  
+                new_pwd = _dob_to_ddmmyyyy(dob)
+  
+                new_hash = hp(new_pwd)
+  
+                db.execute(
+  
+                    "UPDATE users SET password_hash=? WHERE id=? AND institute_id=? AND role='STUDENT'",
+  
+                    (new_hash, student["user_id"], inst_id),
+  
+                )
+  
+
+  
+            # ✅ SAVE ADJUSTMENTS (INCLUDING EXAM)
+  
+            upsert_adjustment(student_id, "EXAM", "Exam Fee", exam_fee)
+  
+            upsert_adjustment(student_id, "HOSTEL", "Hostel Fee", hostel_fee)
+  
+            upsert_adjustment(student_id, "GYM", "Gym Fee", gym_fee)
+  
+            upsert_adjustment(student_id, "LAUNDRY", "Laundry Fee", laundry_fee)
+  
+            upsert_adjustment(student_id, "BUS", "Bus Fee", bus_fee)
+  
+
+  
+            audit_log(
+  
+                db,
+  
+                action="STUDENT_UPDATED",
+  
+                entity_type="student",
+  
+                entity_id=student_id,
+  
+                details={"admission_no": admission_no, "updated": True},
+  
+            )
+  
+
+  
+            db.commit()
+  
+            flash("Student updated successfully.", "success")
+  
+            return redirect(url_for("admin.student_view", student_id=student_id))
+  
+
+  
+        except Exception as e:
+  
+            db.rollback()
+  
+            print("❌ Update student failed:", repr(e))
+  
+            flash("Update failed. Check server logs.", "danger")
+  
+            return redirect(url_for("admin.edit_student", student_id=student_id))
+  
+
+  
+    # GET: build form defaults (✅ include exam_fee)
+  
+    form = {
+  
+        "register_no": student["register_no"] or "",
+  
+        "name": student["name"] or "",
+  
+        "dob": student["dob"] or "",
+  
+        "year": int(student["year"] or 1),
+  
+        "class_": student["class"] or "",
+  
+        "course": student["course"] or "",
+  
+        "student_email": student["student_email"] or "",
+  
+        "parent_email": student["parent_email"] or "",
+  
+        "student_phone": student["student_phone"] or "",
+  
+        "parent_phone": student["parent_phone"] or "",
+  
+        "is_hosteller": int(student["is_hosteller"] or 0),
+  
+
+  
+        # ✅ load exam from DB so input shows correct value
+  
+        "exam_fee": _get_adj("Exam Fee", "EXAM"),
+  
+
+  
+        "hostel_fee": _get_adj("Hostel Fee", "HOSTEL"),
+  
+        "gym_fee": _get_adj("Gym Fee", "GYM"),
+  
+        "laundry_fee": _get_adj("Laundry Fee", "LAUNDRY"),
+  
+        "bus_fee": _get_adj("Bus Fee", "BUS"),
+  
+    }
+  
+
+  
+    fee_plan_warning = not has_fee_plan(form["course"], form["year"]) if form["course"] else False
+  
+
+  
+    return render_template(
+        "admin/edit_student.html",
+        student=student,
+        form=form,
+        course_options=course_options,
+        fee_plan_warning=fee_plan_warning,
+    )
+
+
+# -----------------------------
+# Installment Settings (Phase 4)
+# -----------------------------
+@admin_bp.route("/settings/installments", methods=["GET"])
+@admin_required
+def installments():
+    db = get_db()
+    inst_id = session["institute_id"]
+
+    # List
+    installments = db.execute(
+        """
+        SELECT id, course, year, label, due_date, percentage, late_fee_per_day
+        FROM fee_installments
+        WHERE institute_id=?
+        ORDER BY course, year, due_date
+        """,
+        (inst_id,)
+    ).fetchall()
+
+    # Dropdown courses
+    course_rows = db.execute(
+        "SELECT DISTINCT course FROM fee_plans WHERE institute_id=? ORDER BY course",
+        (inst_id,)
+    ).fetchall()
+    courses = [r["course"] for r in course_rows]
+
+    return render_template(
+        "admin/installments.html",
+        installments=installments,
+        courses=courses
+    )
+
+@admin_bp.route("/settings/installments/add", methods=["POST"])
+@admin_required
+def add_installment():
+    db = get_db()
+    inst_id = session["institute_id"]
+
+    course = (request.form.get("course") or "").strip()
+    year = to_int(request.form.get("year"), 1)
+    label = (request.form.get("label") or "").strip()
+    due_date = (request.form.get("due_date") or "").strip()
+    percentage = to_int(request.form.get("percentage"), 0)
+    late_fee = to_int(request.form.get("late_fee"), 0)
+
+    if not course or not label or not due_date:
+        flash("Course, Label, and Due Date are required.", "danger")
+        return redirect(url_for("admin.installments"))
+
+    try:
+        db.execute(
+            """
+            INSERT INTO fee_installments (institute_id, course, year, label, due_date, percentage, late_fee_per_day)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (inst_id, course, year, label, due_date, percentage, late_fee)
+        )
+        db.commit()
+        flash("Installment schedule added.", "success")
+    except Exception as e:
+        db.rollback()
+        print("Add installment failed:", e)
+        flash("Failed to add installment.", "danger")
+
+    return redirect(url_for("admin.installments"))
+
+@admin_bp.route("/settings/installments/<int:id>/delete", methods=["POST"])
+@admin_required
+def delete_installment(id):
+    db = get_db()
+    inst_id = session["institute_id"]
+
+    db.execute(
+        "DELETE FROM fee_installments WHERE id=? AND institute_id=?",
+        (id, inst_id)
+    )
+    db.commit()
+    flash("Installment deleted.", "success")
+    return redirect(url_for("admin.installments"))
+
+
+# -----------------------------
+# Bulk Upload (Phase 5)
+# -----------------------------
+from utils.bulk import parse_student_csv
+
+@admin_bp.route("/students/upload", methods=["GET", "POST"])
+@admin_required
+def upload_students():
+    db = get_db()
+    inst_id = session["institute_id"]
+
+    if request.method == "POST":
+        file = request.files.get("file")
+        if not file or not file.filename:
+            flash("No file selected.", "danger")
+            return redirect(url_for("admin.upload_students"))
+
+        if not file.filename.lower().endswith(".csv"):
+             flash("Only CSV files are allowed.", "danger")
+             return redirect(url_for("admin.upload_students"))
+
+        # Parse
+        students, parse_errors = parse_student_csv(file.stream)
+
+        if parse_errors:
+            return render_template("admin/upload_students.html", errors=parse_errors)
+
+        success_count = 0
+        insert_errors = []
+        hp = _require_hash_password()
+
+        try:
+            for s in students:
+                admission_no = s["admission_no"].upper()
+                exists = db.execute("SELECT 1 FROM students WHERE admission_no=? AND institute_id=?", (admission_no, inst_id)).fetchone()
+                if exists:
+                    insert_errors.append(f"Skipped {admission_no}: Already exists.")
+                    continue
+
+                raw_pwd = _dob_to_ddmmyyyy(s["dob"])
+                password_hash = hp(raw_pwd)
+                
+                db.execute("INSERT INTO users (username, password_hash, role, institute_id, is_active) VALUES (?, ?, 'STUDENT', ?, 1)", (admission_no, password_hash, inst_id))
+                user_id = db.execute("SELECT last_insert_rowid() AS id").fetchone()["id"]
+
+                db.execute("""
+                    INSERT INTO students (
+                        user_id, admission_no, name, dob, year, class, course,
+                        student_email, parent_email, student_phone, parent_phone,
+                        institute_id, is_active
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+                """, (
+                    user_id, admission_no, s["name"], s["dob"], s["year"], s["class"], s["course"],
+                    s["student_email"], s["parent_email"], s["student_phone"], s["parent_phone"],
+                    inst_id
+                ))
+                
+                # Create fee adjustments for hostel if needed? 
+                # Bulk upload usually just creates the student. Adjustments are manual or separate.
+                # But creating student triggers audits?
+                # Let's add audit log
+                audit_log(db, action="STUDENT_IMPORTED", entity_type="student", entity_id=user_id, details={"adm": admission_no})
+
+                success_count += 1
+            
+            db.commit()
+            if success_count > 0:
+                flash(f"Successfully uploaded {success_count} students.", "success")
+            
+            if insert_errors:
+                return render_template("admin/upload_students.html", errors=insert_errors, success_count=success_count)
+                
+            return redirect(url_for("admin.dashboard"))
+            
+        except Exception as e:
+            db.rollback()
+            print("Bulk upload failed:", e)
+            flash(f"Critical error: {str(e)}", "danger")
+            return redirect(url_for("admin.upload_students"))
+
+    return render_template("admin/upload_students.html")
+
+
+# -----------------------------
+# Reports & Notifications (Phase 6)
+# -----------------------------
+from utils.reports import generate_daily_collection_pdf, generate_dues_csv
+from utils.notifications import send_alert
+from flask import send_file, Response, make_response
+from datetime import date
+
+@admin_bp.route("/reports", methods=["GET"])
+@admin_required
+def reports():
+    return render_template("admin/reports.html", today=date.today())
+
+@admin_bp.route("/reports/daily-pdf", methods=["GET"])
+@admin_required
+def download_daily_report():
+    db = get_db()
+    inst_id = session["institute_id"]
+    date_str = request.args.get("date") or str(date.today())
+
+    pdf_bytes = generate_daily_collection_pdf(db, inst_id, date_str)
+    
+    response = make_response(pdf_bytes)
+    response.headers['Content-Type'] = 'application/pdf'
+    response.headers['Content-Disposition'] = f'inline; filename=DailyCollection_{date_str}.pdf'
+    return response
+
+@admin_bp.route("/reports/dues-csv", methods=["GET"])
+@admin_required
+def download_dues_report():
+    db = get_db()
+    inst_id = session["institute_id"]
+    
+    # This might be slow for many students, optimization via SQL needed for real world
+    csv_str = generate_dues_csv(db, inst_id)
+    
+    return Response(
+        csv_str,
+        mimetype="text/csv",
+        headers={"Content-disposition": "attachment; filename=Outstanding_Dues.csv"}
+    )
+
+@admin_bp.route("/reports/send-notifications", methods=["POST"])
+@admin_required
+def send_notifications():
+    db = get_db()
+    inst_id = session["institute_id"]
+    
+    # Get all active students
+    students = db.execute("SELECT id, admission_no, student_phone FROM students WHERE institute_id=? AND is_active=1", (inst_id,)).fetchall()
+    
+    from utils.fees import get_fee_state_for_student
+    count = 0
+    
+    for s in students:
+        state = get_fee_state_for_student(db, s["id"])
+        due = state.get("due_total", 0)
+        if due > 0:
+            msg = f"Dear Student, you have outstanding fees of Rs. {due}. Please pay immediately to avoid late fees."
+            send_alert(s["id"], msg, type="SMS")
+            count += 1
+            
+    flash(f"Alerts sent to {count} students with outstanding dues.", "success")
+    return redirect(url_for("admin.reports"))
+

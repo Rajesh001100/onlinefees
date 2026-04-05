@@ -1,0 +1,62 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card glass border-0 shadow-sm">
+            <div class="card-header bg-transparent border-0">
+                <h4 class="fw-bold mb-0">Bulk Student Upload</h4>
+                <p class="text-muted small mb-0">Import students via CSV file</p>
+            </div>
+            <div class="card-body">
+
+                <div class="alert alert-info border-0 bg-info bg-opacity-10 text-info mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Instructions:</strong> Use a CSV file with these headers:
+                    <br>
+                    <code>admissionno, name, dob, year, class, course</code>
+                    <br>
+                    <span class="small text-muted">(Optional: studentemail, parentemail, studentphone,
+                        parentphone)</span>
+                </div>
+
+                <form method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Select CSV File</label>
+                        <input type="file" name="file" class="form-control form-control-lg" accept=".csv" required>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+                        <button class="btn btn-primary px-4">Upload Students</button>
+                    </div>
+                </form>
+
+                {% if errors %}
+                <div class="mt-4">
+                    <h6 class="text-danger fw-bold">Upload Errors ({{ errors|length }})</h6>
+                    <div class="alert alert-danger border-0 bg-danger bg-opacity-10 text-danger p-3 small"
+                        style="max-height: 200px; overflow-y: auto;">
+                        <ul class="mb-0 ps-3">
+                            {% for e in errors %}
+                            <li>{{ e }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                {% endif %}
+
+                {% if success_count %}
+                <div class="mt-4 alert alert-success border-0 bg-success bg-opacity-10 text-success">
+                    <i class="bi bi-check-circle me-2"></i>
+                    Successfully imported <strong>{{ success_count }}</strong> students!
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

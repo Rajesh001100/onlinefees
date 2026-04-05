@@ -1,0 +1,28 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold mb-0">Year {{ year }}</h4>
+    <div class="text-muted small">Select a class</div>
+  </div>
+  <a class="btn btn-outline-secondary rounded-4" href="{{ url_for('admin.dashboard') }}">Back</a>
+</div>
+
+<div class="row g-3">
+  {% for c in classes %}
+  <div class="col-md-4">
+    <a class="card border-0 shadow-sm rounded-4 text-decoration-none"
+       href="{{ url_for('admin.students', year=year, cls=c.class) }}">
+      <div class="card-body p-4">
+        <div class="fw-bold">{{ c.class }}</div>
+        <div class="text-muted small mt-1">{{ c.count }} students</div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+{% if classes|length == 0 %}
+  <div class="text-muted mt-3">No students found for this year.</div>
+{% endif %}
+{% endblock %}

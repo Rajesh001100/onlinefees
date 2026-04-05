@@ -1,0 +1,54 @@
+{% extends "shared/layout.html" %}
+
+{% block content %}
+
+<div class="container d-flex flex-column justify-content-center min-vh-100">
+  <div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card glass shadow-lg border-0 rounded-4 overflow-hidden">
+          <div class="bg-primary p-4 text-center text-white">
+            <div class="rounded-circle bg-white d-inline-flex align-items-center justify-content-center mb-3 shadow-sm" style="width: 70px; height: 70px;">
+                <img src="{{ url_for('static', filename='brand/jkkm.png') }}" style="height: 45px; object-fit: contain;">
+            </div>
+            <h5 class="fw-bold mb-0 text-white">{{ (institute.short if institute else "JKKM") }} Admissions</h5>
+            <small class="opacity-75 d-block">{{ (institute.full if institute else "Search Portal") }}</small>
+          </div>
+          <div class="card-body p-4 p-md-5">
+
+          <form method="post">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-3">
+              <label class="form-label small fw-bold text-muted">ADMISSION NO</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i
+                    class="fa-solid fa-id-card text-muted"></i></span>
+                <input name="admission_no" class="form-control border-start-0 ps-0" required
+                  placeholder="Ex: 2023ENG001">
+              </div>
+            </div>
+            <div class="mb-4">
+              <label class="form-label small fw-bold text-muted">PASSWORD</label>
+              <div class="input-group">
+                <span class="input-group-text bg-transparent border-end-0"><i
+                    class="fa-solid fa-key text-muted"></i></span>
+                <input name="password" type="password" class="form-control border-start-0 ps-0" required
+                  placeholder="DOB (DDMMYYYY)">
+              </div>
+            </div>
+            <div class="d-grid mt-4">
+              <button class="btn btn-primary btn-lg py-2 rounded-pill shadow-sm fw-bold">Sign In to Portal</button>
+            </div>
+          </form>
+
+          <div class="mt-4 text-center">
+            <a href="{{ url_for('student.select_institute') }}"
+              class="text-decoration-none small text-muted hover-underline">
+              <i class="fa-solid fa-arrow-left me-1"></i> Change Institute
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

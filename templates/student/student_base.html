@@ -1,0 +1,94 @@
+{% extends "shared/layout.html" %}
+
+{% block content %}
+<style>
+  :root {
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.4);
+    --premium-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+  .navbar-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--glass-border);
+    box-shadow: var(--premium-shadow);
+  }
+  .nav-link-premium {
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+  .nav-link-premium:hover {
+    background: rgba(13, 110, 253, 0.1);
+    transform: translateY(-1px);
+  }
+  .footer-glass {
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border-top: 1px solid var(--glass-border);
+  }
+  @media (max-width: 768px) {
+    .navbar-brand span { font-size: 0.9rem; }
+    .container-main { padding-top: 4.5rem !important; }
+  }
+</style>
+
+<nav class="navbar navbar-expand-lg fixed-top navbar-glass">
+  <div class="container py-1">
+    <a class="navbar-brand d-flex align-items-center gap-2 fw-bold text-primary"
+      href="{{ url_for('student.select_institute') }}">
+      <img src="{{ url_for('static', filename='brand/jkkm.png') }}" alt="JKKM Logo"
+        style="width:36px;height:36px;object-fit:contain;">
+      <span class="d-none d-sm-inline">JKKM Student Portal</span>
+      <span class="d-inline d-sm-none">JKKM Panel</span>
+    </a>
+    
+    <div class="ms-auto d-flex align-items-center gap-3">
+      {% if session.get("role") == "STUDENT" %}
+        <div class="d-none d-md-flex align-items-center gap-2">
+          <a class="nav-link-premium text-primary" href="{{ url_for('student.dashboard') }}">Dashboard</a>
+          <a class="nav-link-premium text-primary" href="{{ url_for('student.fees') }}">Fees</a>
+        </div>
+        <a class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm d-md-none" 
+           href="{{ url_for('student.dashboard') }}">
+           <i class="fa-solid fa-house"></i>
+        </a>
+        <a class="btn btn-sm btn-outline-danger rounded-pill px-3 d-flex align-items-center gap-2" 
+           href="{{ url_for('student.logout') }}">
+          <span class="d-none d-md-inline">Logout</span>
+          <i class="fa-solid fa-right-from-bracket"></i>
+        </a>
+      {% endif %}
+    </div>
+  </div>
+</nav>
+
+<div class="container container-main py-5 mt-5 min-vh-100">
+  <div class="pt-2 pt-md-4">
+    {% block student_content %}{% endblock %}
+  </div>
+</div>
+
+<footer class="footer-glass border-top mt-5">
+  <div class="container py-4">
+    <div class="row align-items-center text-center text-md-start">
+      <div class="col-md-6">
+        <div class="text-muted small">
+          <span class="fw-bold text-primary">College Fees Manager</span> — Secure Student Portal
+        </div>
+        <div class="text-muted small mt-1">© 2026 techchallengers1817. Quality Education & Innovation.</div>
+      </div>
+      <div class="col-md-6 mt-3 mt-md-0 d-flex justify-content-center justify-content-md-end gap-3">
+        <div class="small text-muted d-flex align-items-center gap-1">
+          <i class="fa-solid fa-shield-halved text-success"></i> Secure Payments
+        </div>
+        <div class="small text-muted d-flex align-items-center gap-1">
+          <i class="fa-solid fa-headset text-info"></i> Support
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+{% endblock %}

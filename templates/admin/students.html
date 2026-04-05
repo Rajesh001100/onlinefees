@@ -1,0 +1,167 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <div>
+    <h4 class="fw-bold mb-0">Year {{ year }} — {{ cls }}</h4>
+    <div class="text-muted small">{{ total }} student{{ 's' if total != 1 else '' }} found</div>
+  </div>
+  <a class="btn btn-outline-secondary rounded-4" href="{{ url_for('admin.classes', year=year) }}">Back</a>
+</div>
+
+<form class="row g-2 align-items-center mb-3" method="get">
+  <div class="col-md-6">
+    <input class="form-control rounded-4" name="q" value="{{ q }}"
+      placeholder="Search by admission no / name / register no">
+  </div>
+
+  <div class="col-md-3">
+    <select class="form-select rounded-4" name="sort">
+      <option value="admission" {% if sort=='admission' %}selected{% endif %}>Sort: Admission No</option>
+      <option value="name" {% if sort=='name' %}selected{% endif %}>Sort: Name</option>
+      <option value="regno" {% if sort=='regno' %}selected{% endif %}>Sort: Register No</option>
+    </select>
+  </div>
+
+  <div class="col-md-2">
+    <select class="form-select rounded-4" name="order">
+      <option value="asc" {% if order=='asc' %}selected{% endif %}>Ascending</option>
+      <option value="desc" {% if order=='desc' %}selected{% endif %}>Descending</option>
+    </select>
+  </div>
+
+  <div class="col-md-1 d-grid">
+    <button class="btn btn-primary rounded-4">Go</button>
+  </div>
+
+  <div class="col-md-12 mt-2">
+    <button type="button" id="analyzeRiskBtn" class="btn btn-outline-warning btn-sm rounded-pill px-3">
+      <i class="fa-solid fa-microchip me-1"></i> AI Risk Analysis (Current Page)
+    </button>
+  </div>
+</form>
+
+<div class="card glass shadow-lg border-0">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle mb-0">
+        <thead class="text-muted small">
+          <tr>
+            <th>Admission No</th>
+            <th>Name</th>
+            <th>Register No</th>
+            <th class="text-center">AI Risk</th>
+            <th class="text-end">Open</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in students %}
+          <tr>
+            <td class="fw-semibold">{{ s.admission_no }}</td>
+            <td>{{ s.name }}</td>
+            <td>{{ s.register_no or "-" }}</td>
+            <td class="text-center">
+              <div class="risk-indicator" data-student-id="{{ s.id }}">
+                <span class="text-muted small">--</span>
+              </div>
+            </td>
+            <td class="text-end">
+              <a class="btn btn-sm btn-outline-primary rounded-4"
+                href="{{ url_for('admin.student_view', student_id=s.id) }}">
+                View
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% if students|length == 0 %}
+<div class="text-muted mt-3">No students found.</div>
+{% endif %}
+
+<!-- Pagination -->
+{% if total_pages > 1 %}
+<nav class="mt-4 d-flex justify-content-center" aria-label="Student list pagination">
+  <ul class="pagination">
+    <li class="page-item {% if page <= 1 %}disabled{% endif %}">
+      <a class="page-link"
+        href="{{ url_for('admin.students', year=year, cls=cls, q=q, sort=sort, order=order, page=page-1) }}">
+        &laquo; Prev
+      </a>
+    </li>
+
+    {% for p in range(1, total_pages + 1) %}
+      {% if p == page %}
+      <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+      {% elif p <= 3 or p > total_pages - 2 or (p >= page - 1 and p <= page + 1) %}
+      <li class="page-item">
+        <a class="page-link"
+          href="{{ url_for('admin.students', year=year, cls=cls, q=q, sort=sort, order=order, page=p) }}">
+          {{ p }}
+        </a>
+      </li>
+      {% elif p == 4 or p == total_pages - 2 %}
+      <li class="page-item disabled"><span class="page-link">…</span></li>
+      {% endif %}
+    {% endfor %}
+
+    <li class="page-item {% if page >= total_pages %}disabled{% endif %}">
+      <a class="page-link"
+        href="{{ url_for('admin.students', year=year, cls=cls, q=q, sort=sort, order=order, page=page+1) }}">
+        Next &raquo;
+      </a>
+    </li>
+  </ul>
+</nav>
+{% endif %}
+
+<script>
+document.getElementById('analyzeRiskBtn').addEventListener('click', function() {
+    const btn = this;
+    const indicators = document.querySelectorAll('.risk-indicator');
+    const studentIds = Array.from(indicators).map(el => el.dataset.studentId);
+    
+    if (studentIds.length === 0) return;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Analyzing...';
+    
+    // Fetch individual scores for visual impact (waterfall effect)
+    studentIds.forEach(id => {
+        const el = document.querySelector(`.risk-indicator[data-student-id="${id}"]`);
+        el.innerHTML = '<span class="spinner-border spinner-border-sm text-warning" role="status"></span>';
+        
+        fetch(`/admin/student/${id}/risk-score`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.level) {
+                    el.innerHTML = `
+                        <span class="badge text-bg-${data.badge_class} rounded-pill px-2 py-1" 
+                              style="font-size: 0.65rem;"
+                              title="${data.reasons.join('\n')}"
+                              data-bs-toggle="tooltip">
+                            ${data.emoji} ${data.level}
+                        </span>
+                    `;
+                    // Initialize tooltip for the new badge
+                    new bootstrap.Tooltip(el.querySelector('.badge'));
+                } else {
+                    el.innerHTML = '<span class="text-muted small">--</span>';
+                }
+            })
+            .catch(() => {
+                el.innerHTML = '<span class="text-muted small">ERR</span>';
+            });
+    });
+    
+    // Reset button after some time or when all finished
+    setTimeout(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-check me-1"></i> Analysis Complete';
+    }, 3000);
+});
+</script>
+{% endblock %}

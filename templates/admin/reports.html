@@ -1,0 +1,83 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row align-items-center mb-4">
+    <div class="col">
+        <h2 class="fw-bold mb-0">Reports & Notifications</h2>
+        <p class="text-muted">Generate financial reports and send alerts.</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- DAILY COLLECTION -->
+    <div class="col-md-4">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-primary">
+                    <i class="fa-solid fa-file-pdf fa-3x"></i>
+                </div>
+                <h5 class="fw-bold">Daily Collection Report</h5>
+                <p class="text-muted small">Download daily transaction summary (PDF)</p>
+
+                <form action="{{ url_for('admin.download_daily_report') }}" method="get" target="_blank">
+                    <div class="input-group mb-3">
+                        <input type="date" name="date" class="form-control" required value="{{ today }}">
+                        <button class="btn btn-primary"><i class="fa-solid fa-download"></i></button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- DUES REPORT -->
+    <div class="col-md-4">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-success">
+                    <i class="fa-solid fa-file-csv fa-3x"></i>
+                </div>
+                <h5 class="fw-bold">Outstanding Dues</h5>
+                <p class="text-muted small">List of students with pending fees (CSV)</p>
+
+                <div class="d-flex gap-2 w-100 mt-3">
+                    <a href="{{ url_for('admin.download_dues_report') }}" class="btn btn-success flex-grow-1">
+                        <i class="fa-solid fa-file-csv me-1"></i> CSV
+                    </a>
+                    <a href="{{ url_for('admin.download_dues_report_excel') }}" class="btn btn-outline-success flex-grow-1">
+                        <i class="fa-solid fa-file-excel me-1"></i> Excel
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATIONS -->
+    <div class="col-md-4">
+        <div class="card glass border-0 shadow-sm h-100">
+            <div class="card-body text-center p-4">
+                <div class="mb-3 text-warning">
+                    <i class="fa-solid fa-bell fa-3x"></i>
+                </div>
+                <h5 class="fw-bold">Late Fee Alerts</h5>
+                <p class="text-muted small">Send SMS/Email to students with overdue payments.</p>
+
+                <form action="{{ url_for('admin.send_notifications') }}" method="post"
+                    onsubmit="return confirm('Send email alerts to ALL defaulters?');" class="mb-2">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-warning text-dark w-100">
+                        <i class="fa-solid fa-envelope me-2"></i> Send Email Alerts
+                    </button>
+                </form>
+
+                <form action="{{ url_for('admin.whatsapp_bulk_remind') }}" method="post"
+                    onsubmit="return confirm('Send WhatsApp reminders to ALL defaulters? This uses Twilio API.');">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button class="btn btn-success w-100">
+                        <i class="fa-brands fa-whatsapp me-2"></i> Send WhatsApp Alerts
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

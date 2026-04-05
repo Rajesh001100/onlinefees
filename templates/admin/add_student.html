@@ -1,0 +1,406 @@
+{% extends "shared/layout.html" %}
+{% block content %}
+
+<div class="container py-4">
+
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+    <div>
+      <h3 class="mb-1">Add Student</h3>
+      <div class="text-muted small">Create a new student profile (soft-delete supported).</div>
+    </div>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary rounded-4">Back</a>
+  </div>
+
+  {% if fee_plan_warning %}
+  <div class="alert alert-warning rounded-4">
+    <div class="fw-semibold mb-1">Fee Plan Warning</div>
+    <div class="small">
+      No fee plan found for this institute + selected course + year.
+      You can still add the student, but fee calculation will show an error until you create the fee plan.
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+
+      <form method="POST" enctype="multipart/form-data" class="row g-3" id="addStudentForm">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+        <div class="col-md-4">
+          <label class="form-label">Admission No *</label>
+          <input name="admission_no" class="form-control rounded-4" required
+            value="{{ form.admission_no if form else '' }}">
+          <div class="text-muted small mt-1">Photo will be saved as <b>ADMISSIONNO.jpg/png/webp</b></div>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Register No</label>
+          <input name="register_no" class="form-control rounded-4" value="{{ form.register_no if form else '' }}">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">DOB (YYYY-MM-DD) *</label>
+          <input type="date" name="dob" class="form-control rounded-4" required value="{{ form.dob if form else '' }}">
+          <div class="text-muted small mt-1">Student password = DOB (DDMMYYYY)</div>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Name *</label>
+          <input name="name" class="form-control rounded-4" required value="{{ form.name if form else '' }}">
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Year *</label>
+          <select name="year" class="form-select rounded-4" required>
+            <option value="">Select</option>
+            {% for y in [1,2,3,4] %}
+            <option value="{{ y }}" {% if form and (form.year|int)==y %}selected{% endif %}>{{ y }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Class *</label>
+          <input name="class" class="form-control rounded-4" required value="{{ form.class_ if form else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Course *</label>
+          {% if course_options and course_options|length > 0 %}
+          <select name="course" class="form-select rounded-4" required>
+            <option value="">Select course</option>
+            {% for c in course_options %}
+            <option value="{{ c }}" {% if form and form.course==c %}selected{% endif %}>{{ c }}</option>
+            {% endfor %}
+          </select>
+          <div class="text-muted small mt-1">Courses pulled from fee_plans for this institute.</div>
+          {% else %}
+          <input name="course" class="form-control rounded-4" required value="{{ form.course if form else '' }}">
+          <div class="text-muted small mt-1">No fee_plans found; manual course entry enabled.</div>
+          {% endif %}
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Student Photo (optional)</label>
+          <input type="file" name="photo" class="form-control rounded-4" accept=".jpg,.jpeg,.png,.webp">
+          <div class="text-muted small mt-1">Saved as <b>ADMISSIONNO.ext</b>. Uploading is optional.</div>
+        </div>
+        <div class="col-12">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Exam Fee (Arrear / Special)</label>
+              <input name="exam_fee" type="number" min="0" class="form-control rounded-4"
+                value="{{ form.exam_fee if form else 0 }}">
+              <div class="text-muted small mt-1">
+                Use only when applicable (arrear / special exam).
+              </div>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label text-primary fw-bold">Admission Fee</label>
+              <input name="admission_fee" type="number" min="0" class="form-control rounded-4 border-primary"
+                value="{{ form.admission_fee if form else 0 }}">
+              <div class="text-muted small mt-1">
+                One-time fee included in the total.
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-md-4">
+          <label class="form-label">Hostel Participation (All 8 Semesters)</label>
+          <div class="d-flex gap-3 flex-wrap bg-light p-2 rounded-4 px-3 border align-items-center">
+            {% for i in range(1, 9) %}
+            <div class="form-check form-switch mb-0">
+              <input class="form-check-input hostel-check" type="checkbox" name="hostel_sem{{ i }}" id="hostelSem{{ i }}" value="1" 
+                {% if form and (form['hostel_sem' ~ i]|int)==1 %}checked{% endif %}>
+              <label class="form-check-label small fw-semibold" for="hostelSem{{ i }}">Sem {{ i }}</label>
+            </div>
+            {% endfor %}
+          </div>
+          <input type="hidden" name="is_hosteller" id="isHosteller" value="{{ form.is_hosteller if form else 0 }}">
+          <div class="text-muted small mt-1">Check semesters if staying in hostel.</div>
+        </div>
+
+        <!-- Day Scholar Mode (Visible if Hosteller=No) -->
+        <div class="col-md-4" id="dayScholarModeDiv" style="display:none;">
+          <label class="form-label">Transport Mode</label>
+          <div class="d-flex gap-3 bg-light p-2 rounded-4 px-3 border">
+            <div class="form-check">
+              <input class="form-check-input ds-mode" type="radio" name="day_scholar_mode" id="dsModeBus" value="BUS"
+                checked>
+              <label class="form-check-label" for="dsModeBus">College Bus</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input ds-mode" type="radio" name="day_scholar_mode" id="dsModeOwn" value="OWN">
+              <label class="form-check-label" for="dsModeOwn">Own / Other</label>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12">
+          <div class="fw-semibold">Optional Fee Adjustments <span class="text-muted">(saved into fee_adjustments)</span>
+          </div>
+          <div class="text-muted small">Enter only what applies.</div>
+        </div>
+
+        <div class="col-12">
+          <div id="hostelGroup" class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Gym Fee (Hostel)</label>
+              <input id="gymFee" name="gym_fee" type="number" min="0" class="form-control rounded-4"
+                value="{{ form.gym_fee if form else 0 }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Laundry Fee (Hostel)</label>
+              <input id="laundryFee" name="laundry_fee" type="number" min="0" class="form-control rounded-4"
+                value="{{ form.laundry_fee if form else 0 }}">
+            </div>
+          </div>
+
+          <div id="busGroup" class="row g-3 mt-0">
+            <div class="col-md-3">
+              <label class="form-label">Bus Fee</label>
+              <input id="busFee" name="bus_fee" type="number" min="0" class="form-control rounded-4"
+                value="{{ form.bus_fee if form else 0 }}">
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-3">
+
+        <!-- ✅ Benefit: exactly ONE -->
+        <div class="col-12">
+          <div class="fw-semibold">Fee Benefit (choose only ONE)</div>
+          <div class="alert alert-info py-2 small mb-3 rounded-4 mt-2">
+            <b>Benefit Calculations Breakdown:</b>
+            <ul class="mb-0 mt-1 ps-3 text-secondary">
+              <li><b>First Graduate:</b> Automatically waives up to ₹25,000 from the Tuition Fee.</li>
+              <li><b>7.5 Reservation:</b> Automatically waives 100% of the Tuition Fee AND 100% of the Hostel Fee.</li>
+              <li><b>Scholarship:</b> Select a type (SC, ST, BC, etc.). The amount is fixed based on institute settings and deducts from Tuition first.</li>
+              <li><b>Quota:</b> You enter the amount. It is tracked as a clean 'Quota Discount' adjustment.</li>
+            </ul>
+          </div>
+
+          {% set bt = (form.benefit_type if form else 'NONE') %}
+          <div class="row g-3">
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input benefit-radio" type="radio" name="benefit_type" value="NONE" {% if
+                  bt=='NONE' %}checked{% endif %}>
+                <label class="form-check-label">No Benefit</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input benefit-radio" type="radio" name="benefit_type" value="FIRST_GRADUATE" {%
+                  if bt=='FIRST_GRADUATE' %}checked{% endif %}>
+                <label class="form-check-label">First Graduate</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input benefit-radio" type="radio" name="benefit_type" value="RESERVATION_7_5"
+                  {% if bt=='RESERVATION_7_5' %}checked{% endif %}>
+                <label class="form-check-label">7.5 Reservation</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input benefit-radio" type="radio" name="benefit_type" value="SCHOLARSHIP" {% if
+                  bt=='SCHOLARSHIP' %}checked{% endif %}>
+                <label class="form-check-label">Scholarship</label>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <div class="form-check">
+                <input class="form-check-input benefit-radio" type="radio" name="benefit_type" value="QUOTA" {% if
+                  bt=='QUOTA' %}checked{% endif %}>
+                <label class="form-check-label">Quota</label>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-3 mt-2">
+            <div class="col-md-4">
+              <label class="form-label">Scholarship Type</label>
+              <select class="form-select rounded-4" name="scholarship_type_selected" id="scholarshipType">
+                <option value="NONE">Select Scholarship</option>
+                {% if scholarships %}
+                  {% for s in scholarships %}
+                    {% if s.scholarship_type != 'NONE' %}
+                    <option value="{{ s.scholarship_type }}" {% if form and form.scholarship_type == s.scholarship_type %}selected{% endif %}>
+                      {{ s.scholarship_type }} (₹{{ "{:,}".format(s.amount) }})
+                    </option>
+                    {% endif %}
+                  {% endfor %}
+                {% endif %}
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Quota Type</label>
+              <select class="form-select rounded-4" name="quota_type">
+                <option value="">Select</option>
+                <option value="MGMT" {% if form and form.quota_type=='MGMT' %}selected{% endif %}>Management</option>
+                <option value="SPORTS" {% if form and form.quota_type=='SPORTS' %}selected{% endif %}>Sports</option>
+                <option value="NRI" {% if form and form.quota_type=='NRI' %}selected{% endif %}>NRI</option>
+                <option value="OTHER" {% if form and form.quota_type=='OTHER' %}selected{% endif %}>Other</option>
+              </select>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Quota Amount</label>
+              <input type="number" min="0" class="form-control rounded-4" name="quota_amount"
+                value="{{ form.quota_amount if form else '' }}">
+            </div>
+
+            <div class="col-12">
+              <div class="alert alert-light border rounded-4 py-2 small mb-0">
+                <b>Rule:</b> Scholarship/Quota become DISCOUNT rows (negative amount). First Graduate + 7.5 Reservation
+                are stored on student profile.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <hr class="my-2">
+
+        <div class="col-md-6">
+          <label class="form-label">Student Email</label>
+          <input name="student_email" type="email" class="form-control rounded-4"
+            value="{{ form.student_email if form else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Parent Email</label>
+          <input name="parent_email" type="email" class="form-control rounded-4"
+            value="{{ form.parent_email if form else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Student Phone</label>
+          <input name="student_phone" class="form-control rounded-4" value="{{ form.student_phone if form else '' }}">
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Parent Phone</label>
+          <input name="parent_phone" class="form-control rounded-4" value="{{ form.parent_phone if form else '' }}">
+        </div>
+
+        <div class="col-12 d-flex justify-content-end gap-2 mt-2">
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary rounded-4 px-3">Cancel</a>
+          <button type="submit" class="btn btn-primary rounded-4 px-4">Save</button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const dsRadios = document.querySelectorAll(".ds-mode");
+    const dsRadioBus = document.getElementById("dsModeBus");
+    const hostelChecks = document.querySelectorAll(".hostel-check");
+    const isHostellerHidden = document.getElementById("isHosteller");
+    const hostelGroup = document.getElementById("hostelGroup");
+    const busGroup = document.getElementById("busGroup");
+    const dayScholarModeDiv = document.getElementById("dayScholarModeDiv");
+    const gymFee = document.getElementById("gymFee");
+    const laundryFee = document.getElementById("laundryFee");
+    const busFee = document.getElementById("busFee");
+
+    function syncHostel() {
+      let hostel = false;
+      for (let i = 1; i <= 8; i++) {
+        const check = document.getElementById("hostelSem" + i);
+        if (check && check.checked) {
+          hostel = true;
+          break;
+        }
+      }
+
+      // Update hidden field
+      if (isHostellerHidden) isHostellerHidden.value = hostel ? "1" : "0";
+
+      // 1. Show/Hide Hostel Group
+      if (hostelGroup) hostelGroup.style.display = hostel ? "" : "none";
+
+      // 2. Show/Hide Day Scholar Mode Selection
+      if (dayScholarModeDiv) dayScholarModeDiv.style.display = hostel ? "none" : "";
+
+      if (hostel) {
+        // Checking Hostel: Clear day scholar stuff
+        if (busGroup) busGroup.style.display = "none";
+      } else {
+        // Checking Day Scholar: Clear hostel stuff
+        if (gymFee) gymFee.value = 0;
+        if (laundryFee) laundryFee.value = 0;
+
+        // Sync Bus visibility based on selected mode
+        syncDayScholarMode();
+      }
+    }
+
+    function syncDayScholarMode() {
+      if (isHostellerHidden && isHostellerHidden.value === "1") return; 
+
+      const isBus = dsRadioBus && dsRadioBus.checked;
+      if (busGroup) busGroup.style.display = isBus ? "" : "none";
+
+      if (!isBus) {
+        // Own vehicle -> No bus fee
+        if (busFee) busFee.value = 0;
+      }
+    }
+
+    const radios = document.querySelectorAll(".benefit-radio");
+    const quotaType = document.querySelector("[name='quota_type']");
+    const quotaAmount = document.querySelector("[name='quota_amount']");
+    const scholarshipType = document.getElementById('scholarshipType');
+
+    function updateBenefitFields() {
+      const selected = document.querySelector('input[name="benefit_type"]:checked').value;
+      
+      // Initial hide all
+      scholarshipType.closest('.col-md-4').classList.add('d-none');
+      quotaType.closest('.col-md-4').classList.add('d-none');
+      quotaAmount.closest('.col-md-4').classList.add('d-none');
+
+      const isScholar = (selected === 'SCHOLARSHIP');
+      const isQuota = (selected === 'QUOTA');
+
+      if (isScholar) {
+        scholarshipType.closest('.col-md-4').classList.remove('d-none');
+      } else if (isQuota) {
+        quotaType.closest('.col-md-4').classList.remove('d-none');
+        quotaAmount.closest('.col-md-4').classList.remove('d-none');
+      }
+      
+      if (quotaType) {
+        quotaType.disabled = !isQuota;
+        if (!isQuota) quotaType.value = "";
+      }
+
+      if (quotaAmount) {
+        quotaAmount.disabled = !isQuota;
+        if (!isQuota) quotaAmount.value = "";
+      }
+    }
+
+    syncHostel();
+    hostelChecks.forEach(c => c.addEventListener("change", syncHostel));
+    dsRadios.forEach(r => r.addEventListener("change", syncDayScholarMode));
+
+    radios.forEach(r => r.addEventListener("change", syncBenefit));
+    syncBenefit();
+  })();
+</script>
+
+{% endblock %}

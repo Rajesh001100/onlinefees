@@ -1,0 +1,358 @@
+{% extends "admin/admin_base.html" %}
+{% block admin_content %}
+
+<!-- Header -->
+<div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-5">
+  <div>
+    {% if inst %}
+    <h3 class="fw-bold mb-1 text-primary">{{ inst.full_name }}</h3>
+    <div class="text-muted small"><i class="fa-solid fa-building-columns me-1"></i> Institute Admin • {{ inst.short_name
+      }}</div>
+    {% elif is_founder is defined and is_founder %}
+    <h3 class="fw-bold mb-1 text-primary">Founder Dashboard</h3>
+    <div class="text-muted small"><i class="fa-solid fa-crown me-1"></i> All Institutes Overview</div>
+    <!-- Institute Filter for Founder -->
+    <form class="d-flex gap-2 mt-2" method="get">
+      <select name="inst" class="form-select form-select-sm rounded-pill" style="max-width:250px;">
+        <option value="">All Institutes</option>
+        {% for i in institutes %}
+        <option value="{{ i.id }}" {% if selected_inst and (selected_inst | int)==i.id %}selected{% endif %}>{{
+          i.full_name }}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-sm btn-primary rounded-pill px-3">Filter</button>
+    </form>
+    {% endif %}
+
+    {% if not is_founder %}
+    <div class="d-flex gap-2 mt-3">
+      <a href="{{ url_for('admin.fee_plans') }}" class="btn btn-primary rounded-4 px-4 shadow-sm">
+        <i class="fa-solid fa-indian-rupee-sign me-1"></i> Manage Fee Plans
+      </a>
+      <a href="{{ url_for('admin.installments') }}" class="btn btn-outline-primary rounded-4 px-3">
+        <i class="fa-solid fa-calendar-check me-1"></i> Installments
+      </a>
+      <a href="{{ url_for('admin.common_fees') }}" class="btn btn-outline-primary rounded-4 px-3">
+        <i class="fa-solid fa-layer-group me-1"></i> Common Fees
+      </a>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if not is_founder %}
+  <a href="{{ url_for('admin.add_student') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+    <i class="fa-solid fa-plus me-2"></i>Add Student
+  </a>
+  {% endif %}
+</div>
+
+<!-- Quick Stats / Year Cards -->
+<style>
+  .stat-bg-0 { background: linear-gradient(135deg, #0A3772 0%, #114080 100%); color: white; }
+  .stat-bg-1 { background: linear-gradient(135deg, #114080 0%, #3b82f6 100%); color: white; }
+  .stat-bg-2 { background: linear-gradient(135deg, #1d4ed8 0%, #60a5fa 100%); color: white; }
+  .stat-bg-3 { background: linear-gradient(135deg, #3b82f6 0%, #93c5fd 100%); color: white; }
+
+  .stat-text-0 { color: #0A3772; }
+  .stat-text-1 { color: #114080; }
+  .stat-text-2 { color: #3b82f6; }
+  .stat-text-3 { color: #60a5fa; }
+</style>
+<div class="row g-4">
+  {% set icons = ['fa-seedling', 'fa-book-open', 'fa-flask', 'fa-graduation-cap'] %}
+  {% for y in year_cards %}
+  <div class="col-md-3">
+    <a class="card glass text-decoration-none h-100 {{ 'hover-lift' if not is_founder else '' }}"
+      href="{{ url_for('admin.classes', year=y.year) if not is_founder else '#' }}">
+      <div class="card-body p-4 position-relative overflow-hidden">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div class="rounded-circle p-3 stat-bg-{{ loop.index0 }}">
+            <i class="fa-solid {{ icons[loop.index0] }} fa-lg"></i>
+          </div>
+          <span class="badge bg-light text-dark border">Year {{ y.year }}</span>
+        </div>
+        <h2 class="fw-bold mb-1">{{ y.count }}</h2>
+        <div class="text-muted small">Total Students</div>
+
+        <!-- Decorative accent -->
+        <div class="position-absolute bottom-0 end-0 p-3 opacity-10">
+          <i class="fa-solid fa-layer-group fa-4x stat-text-{{ loop.index0 }}"></i>
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- Total Students Summary -->
+<div class="row mt-4 g-4">
+  <div class="col-12">
+    <div class="card glass border-0 shadow-sm">
+      <div class="card-body p-4 d-flex align-items-center gap-4">
+        <div class="rounded-circle bg-primary bg-opacity-10 p-3 text-primary">
+          <i class="fa-solid fa-chart-simple fa-2x"></i>
+        </div>
+        <div>
+          <h4 class="fw-bold mb-0">{{ year_cards | sum(attribute='count') }}</h4>
+          <div class="text-muted">Total Active Students Across All Years</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if is_founder and not selected_inst %}
+<!-- Founder Global Stats Section -->
+<div class="row mt-4 g-4">
+  <!-- Institute Collection Comparison -->
+  <div class="col-lg-6">
+    <div class="card glass h-100 border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-bold mb-0"><i class="fa-solid fa-building-columns me-2 text-primary"></i>Collection by Institute</h5>
+        <small class="text-muted">Total Collected (Rs.)</small>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="founderColChart" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Collected vs Outstanding (Stacked) -->
+  <div class="col-lg-6">
+    <div class="card glass h-100 border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-bold mb-0"><i class="fa-solid fa-scale-balanced me-2 text-primary"></i>Total Collected vs Outstanding</h5>
+        <small class="text-muted">Status of Expected Fee Plan</small>
+      </div>
+      <div class="card-body p-4">
+        <canvas id="founderOutChart" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- Analytics Section -->
+<div class="row mt-4 g-4">
+  <!-- Daily Collection -->
+  <div class="col-lg-8">
+    <div class="card glass h-100 border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+        <div>
+          <h5 class="fw-bold mb-0"><i class="fa-solid fa-chart-line me-2 text-primary"></i>Daily Collection</h5>
+          <small class="text-muted">Last 7 Days</small>
+        </div>
+        {% if not is_founder %}
+        <a href="{{ url_for('admin.daily_fees_summary') }}" class="btn btn-sm btn-outline-primary rounded-pill">
+          View Details
+        </a>
+        {% endif %}
+      </div>
+      <div class="card-body p-4">
+        <canvas id="dailyChart" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats Grid -->
+  <div class="col-lg-4">
+    <div class="row g-4">
+      <div class="col-12">
+        <div class="card glass border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-credit-card me-2"></i>Payment Modes</h6>
+            <div style="height: 180px; position: relative;">
+              <canvas id="modesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card glass border-0 shadow-sm">
+          <div class="card-body p-4">
+            <h6 class="fw-bold text-muted mb-3"><i class="fa-solid fa-tags me-2"></i>Fee Categories</h6>
+            <div style="height: 180px; position: relative;">
+              <canvas id="categoriesChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+    const ctxModes = document.getElementById('modesChart').getContext('2d');
+    const ctxCats = document.getElementById('categoriesChart').getContext('2d');
+
+    // Common options
+    Chart.defaults.font.family = "'Inter', sans-serif";
+    Chart.defaults.color = '#64748b';
+
+    fetch("{{ url_for('admin.analytics_api', inst=request.args.get('inst', '')) }}")
+      .then(response => response.json())
+      .then(data => {
+
+        // 1. Daily Collection (Gradient Bar)
+        const gradient = ctxDaily.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, '#0A3772');
+        gradient.addColorStop(1, '#B5D4F1');
+
+        new Chart(ctxDaily, {
+          type: 'bar',
+          data: {
+            labels: data.dates,
+            datasets: [{
+              label: 'Collection (₹)',
+              data: data.daily_collection,
+              backgroundColor: gradient,
+              borderRadius: 12,
+              barThickness: 24
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#1e293b',
+                titleFont: { weight: 'bold' },
+                padding: 12,
+                cornerRadius: 8,
+                callbacks: {
+                  label: function (ctx) {
+                    return '₹ ' + ctx.parsed.y.toLocaleString('en-IN');
+                  }
+                }
+              }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { borderDash: [2, 4], color: '#e2e8f0' },
+                ticks: {
+                  callback: function (value) {
+                    return '₹' + (value >= 1000 ? (value / 1000) + 'K' : value);
+                  }
+                }
+              },
+              x: {
+                grid: { display: false }
+              }
+            }
+          }
+        });
+
+        // 2. Modes (Doughnut)
+        new Chart(ctxModes, {
+          type: 'doughnut',
+          data: {
+            labels: data.modes.labels.length > 0 ? data.modes.labels : ['No Data'],
+            datasets: [{
+              data: data.modes.data.length > 0 ? data.modes.data : [1],
+              backgroundColor: data.modes.data.length > 0
+                ? ['#0A3772', '#114080', '#3b82f6', '#60a5fa', '#93c5fd']
+                : ['#e2e8f0'],
+              borderWidth: 0,
+              cutout: '65%'
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } }
+            }
+          }
+        });
+
+        // 3. Categories (Pie)
+        new Chart(ctxCats, {
+          type: 'pie',
+          data: {
+            labels: data.categories.labels.length > 0 ? data.categories.labels : ['No Data'],
+            datasets: [{
+              data: data.categories.data.length > 0 ? data.categories.data : [1],
+              backgroundColor: data.categories.data.length > 0
+                ? ['#0A3772', '#1e4ed8', '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe']
+                : ['#e2e8f0'],
+              borderWidth: 0
+            }]
+          },
+            options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: 'right', labels: { boxWidth: 12, padding: 8, font: { size: 11 } } }
+            }
+          }
+        });
+
+        // 4. Founder Charts
+        if (data.founder_stats && data.founder_stats.institutes) {
+            const ctxFCol = document.getElementById('founderColChart');
+            if (ctxFCol) {
+                new Chart(ctxFCol.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.founder_stats.institutes,
+                        datasets: [{
+                            label: 'Collected',
+                            data: data.founder_stats.collected,
+                            backgroundColor: 'rgba(16, 185, 129, 0.8)',
+                            borderRadius: 6
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true } }
+                    }
+                });
+            }
+
+            const ctxFOut = document.getElementById('founderOutChart');
+            if (ctxFOut) {
+                new Chart(ctxFOut.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: data.founder_stats.institutes,
+                        datasets: [
+                            {
+                                label: 'Collected',
+                                data: data.founder_stats.collected,
+                                backgroundColor: 'rgba(59, 130, 246, 0.8)',
+                                stack: 'Stack 0',
+                            },
+                            {
+                                label: 'Outstanding',
+                                data: data.founder_stats.outstanding,
+                                backgroundColor: 'rgba(239, 68, 68, 0.8)',
+                                stack: 'Stack 0',
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' } },
+                        scales: {
+                            x: { stacked: true },
+                            y: { stacked: true, beginAtZero: true }
+                        }
+                    }
+                });
+            }
+        }
+
+      })
+      .catch(err => console.error("Analytics Error:", err));
+  });
+</script>
+
+{% endblock %}
