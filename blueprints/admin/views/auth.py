@@ -5,6 +5,24 @@ from extensions import limiter
 from .. import admin_bp
 
 
+@admin_bp.route("/")
+@admin_bp.route("/index")
+def index():
+    """Shortcut for /admin entry point"""
+    role = session.get("role")
+    if role in ["ADMIN", "FOUNDER"]:
+        return redirect(url_for("admin.dashboard"))
+    return redirect(url_for("admin.login"))
+
+
+@admin_bp.route("/founder-portal")
+def founder_portal():
+    """Shortcut for /founder entry point"""
+    if session.get("role") == "FOUNDER":
+        return redirect(url_for("admin.dashboard"))
+    return redirect(url_for("admin.login", role="founder"))
+
+
 @admin_bp.route("/login", methods=["GET", "POST"])
 @limiter.limit("5 per minute")
 def login():

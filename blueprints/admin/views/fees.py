@@ -343,18 +343,32 @@ def edit_installment(id):
 @admin_bp.route("/settings/plans", methods=["GET"])
 @admin_required
 def fee_plans():
-    from models import FeePlan
+    from models import FeePlan, Institute
     from extensions import db
     from sqlalchemy import distinct
 
-    inst_id = session["institute_id"]
+    role = session.get("role")
+    inst_id = session.get("institute_id")
+    filter_inst = request.args.get("institute_id")
 
-    plans = FeePlan.query.filter_by(institute_id=inst_id).order_by(FeePlan.course, FeePlan.year).all()
-
-    courses_q = db.session.query(distinct(FeePlan.course)).filter_by(institute_id=inst_id).order_by(FeePlan.course).all()
-    distinct_courses = [r[0] for r in courses_q]
-
-    return render_template("admin/fee_plans.html", plans=plans, distinct_courses=distinct_courses)
+    # If Founder, they can see everything or filter
+    if role == "FOUNDER":
+        query = FeePlan.query
+        if filter_inst:
+            query = query.filter_by(institute_id=filter_inst)
+        plans = query.order_by(FeePlan.institute_id, FeePlan.course, FeePlan.year).all()
+        
+        courses_q = db.session.query(distinct(FeePlan.course)).order_by(FeePlan.course).all()
+        distinct_courses = [r[0] for r in courses_q]
+        
+        institutes = Institute.query.all()
+        return render_template("admin/fee_plans.html", plans=plans, distinct_courses=distinct_courses, institutes=institutes, is_founder=True)
+    else:
+        # Regular Admin restricted to their institute
+        plans = FeePlan.query.filter_by(institute_id=inst_id).order_by(FeePlan.course, FeePlan.year).all()
+        courses_q = db.session.query(distinct(FeePlan.course)).filter_by(institute_id=inst_id).order_by(FeePlan.course).all()
+        distinct_courses = [r[0] for r in courses_q]
+        return render_template("admin/fee_plans.html", plans=plans, distinct_courses=distinct_courses, is_founder=False)
 
 @admin_bp.route("/settings/plans/add", methods=["POST"])
 @admin_required
@@ -362,7 +376,15 @@ def add_fee_plan():
     from models import FeePlan
     from extensions import db
 
-    inst_id = session["institute_id"]
+    role = session.get("role")
+    inst_id = session.get("institute_id")
+    
+    # If Founder, get institute_id from form
+    if role == "FOUNDER":
+        target_inst_id = request.form.get("institute_id")
+    else:
+        target_inst_id = inst_id
+
     course = (request.form.get("course") or "").strip()
     year = to_int(request.form.get("year"), 1)
     tuition = to_int(request.form.get("tuition"), 0)
@@ -370,17 +392,17 @@ def add_fee_plan():
     other = to_int(request.form.get("other"), 0)
     hostel = to_int(request.form.get("hostel"), 50000)
 
-    if not course:
-        flash("Course name is required.", "danger")
+    if not course or not target_inst_id:
+        flash("Course name and Institute are required.", "danger")
         return redirect(url_for("admin.fee_plans"))
 
-    exists = FeePlan.query.filter_by(institute_id=inst_id, course=course, year=year).first()
+    exists = FeePlan.query.filter_by(institute_id=target_inst_id, course=course, year=year).first()
     if exists:
-        flash(f"Fee plan for {course} Year {year} already exists.", "danger")
+        flash(f"Fee plan for {course} Year {year} already exists in this institute.", "danger")
         return redirect(url_for("admin.fee_plans"))
 
     try:
-        db.session.add(FeePlan(institute_id=inst_id, course=course, year=year, tuition=tuition, exam=exam, other=other, hostel=hostel))
+        db.session.add(FeePlan(institute_id=target_inst_id, course=course, year=year, tuition=tuition, exam=exam, other=other, hostel=hostel))
         db.session.commit()
         flash(f"Fee plan added for {course} Year {year}.", "success")
     except Exception as e:
@@ -395,11 +417,21 @@ def delete_fee_plan(id):
     from models import FeePlan
     from extensions import db
 
-    inst_id = session["institute_id"]
+    role = session.get("role")
+    inst_id = session.get("institute_id")
+    
     try:
-        FeePlan.query.filter_by(id=id, institute_id=inst_id).delete()
-        db.session.commit()
-        flash("Fee plan deleted.", "success")
+        query = FeePlan.query.filter_by(id=id)
+        if role != "FOUNDER":
+            query = query.filter_by(institute_id=inst_id)
+            
+        p = query.first()
+        if p:
+            db.session.delete(p)
+            db.session.commit()
+            flash("Fee plan deleted.", "success")
+        else:
+            flash("Fee plan not found or access denied.", "danger")
     except Exception as e:
         db.session.rollback()
         flash("Failed to delete fee plan.", "danger")
@@ -421,21 +453,31 @@ def edit_fee_plan(id):
         hostel = to_int(request.form.get("hostel"), 50000)
 
         try:
-            p = FeePlan.query.filter_by(id=id, institute_id=inst_id).first()
+            query = FeePlan.query.filter_by(id=id)
+            if role != "FOUNDER":
+                query = query.filter_by(institute_id=inst_id)
+            
+            p = query.first()
             if p:
                 p.tuition = tuition
                 p.exam = exam
                 p.other = other
                 p.hostel = hostel
                 db.session.commit()
-            flash("Fee plan updated successfully.", "success")
+                flash("Fee plan updated successfully.", "success")
+            else:
+                flash("Fee plan not found.", "danger")
         except Exception as e:
             db.session.rollback()
             flash(f"Failed to update fee plan: {e}", "danger")
 
         return redirect(url_for("admin.fee_plans"))
 
-    plan = FeePlan.query.filter_by(id=id, institute_id=inst_id).first()
+    query = FeePlan.query.filter_by(id=id)
+    if role != "FOUNDER":
+        query = query.filter_by(institute_id=inst_id)
+        
+    plan = query.first()
     if not plan:
         flash("Fee plan not found.", "danger")
         return redirect(url_for("admin.fee_plans"))

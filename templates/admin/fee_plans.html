@@ -17,6 +17,18 @@
             <div class="card-body">
                 <form action="{{ url_for('admin.add_fee_plan') }}" method="post">
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    
+                    {% if is_founder %}
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">INSTITUTE</label>
+                        <select name="institute_id" class="form-select" required>
+                            <option value="">Select Institute...</option>
+                            {% for inst in institutes %}
+                            <option value="{{ inst.id }}">{{ inst.short_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
 
                     <div class="mb-3">
                         <label class="form-label small fw-bold text-muted">COURSE NAME</label>
@@ -72,6 +84,9 @@
                         <thead class="bg-light">
                             <tr>
                                 <th class="ps-4">Course</th>
+                                {% if is_founder %}
+                                <th>Institute</th>
+                                {% endif %}
                                 <th>Year</th>
                                 <th>Tuition</th>
                                 <th>Hostel</th>
@@ -84,6 +99,16 @@
                             {% for p in plans %}
                             <tr>
                                 <td class="ps-4 fw-bold">{{ p.course }}</td>
+                                {% if is_founder %}
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        {% if p.institute_id == 'ENG' %}Engineering
+                                        {% elif p.institute_id == 'PHARM' %}Pharmacy
+                                        {% elif p.institute_id == 'AGRI' %}Agriculture
+                                        {% else %}{{ p.institute_id }}{% endif %}
+                                    </span>
+                                </td>
+                                {% endif %}
                                 <td>Year {{ p.year }}</td>
                                 <td>₹{{ p.tuition }}</td>
                                 <td>₹{{ p.hostel }}</td>

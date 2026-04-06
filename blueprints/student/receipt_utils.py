@@ -32,10 +32,14 @@ def _set_stroke(c, rgb):
 
 
 def _get_base_url() -> str:
+    # Prefer BASE_URL from config if set (useful for production public URLs)
+    config_url = current_app.config.get("BASE_URL")
+    if config_url:
+        return config_url.rstrip("/")
     try:
         return request.host_url.rstrip("/")
     except RuntimeError:
-        return current_app.config.get("BASE_URL", "http://localhost:5000")
+        return "http://localhost:5000"
 
 
 def build_receipt_pdf_bytes(student, inst, payment, receipt_no: str) -> bytes:
@@ -322,7 +326,7 @@ def build_receipt_pdf_bytes(student, inst, payment, receipt_no: str) -> bytes:
 
     # QR Code
     try:
-        verify_url = f"{_get_base_url()}/admin/verify-receipt/{receipt_no}"
+        verify_url = f"{_get_base_url()}/verify/{receipt_no}"
         qr = qrcode.QRCode(version=1, box_size=6, border=2)
         qr.add_data(verify_url)
         qr.make(fit=True)

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Fee Receipt | JKK Munirajah Institutions</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #114080;
+            --secondary: #196090;
+            --accent: #b8921a;
+            --success: #10b981;
+            --danger: #ef4444;
+            --bg: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: #1e293b;
+        }
+
+        .verify-card {
+            max-width: 500px;
+            margin: 60px auto;
+            border: none;
+            border-radius: 24px;
+            background: #ffffff;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            padding: 40px 20px;
+            text-align: center;
+            border: none;
+        }
+
+        .card-header img {
+            max-width: 100px;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.1));
+        }
+
+        .card-header h2 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin-bottom: 0;
+            letter-spacing: -0.025em;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 99px;
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-top: -24px;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-success { color: var(--success); }
+        .status-danger { color: var(--danger); }
+
+        .verification-details {
+            padding: 40px 30px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            color: #0f172a;
+            font-weight: 600;
+            font-size: 0.9375rem;
+            text-align: right;
+        }
+
+        .amount-big {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .footer-text {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 0.75rem;
+            padding: 20px;
+            background: #f8fafc;
+        }
+
+        .seal-icon {
+            font-size: 3rem;
+            color: var(--success);
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 576px) {
+            .verify-card {
+                margin: 20px;
+                border-radius: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="verify-card animate__animated animate__fadeInUp">
+            <div class="card-header">
+                <img src="/static/brand/jkkm.png" alt="Logo" onerror="this.src='https://via.placeholder.com/100?text=JKKM'">
+                <h2>Receipt Verification</h2>
+            </div>
+
+            <div class="text-center">
+                {% if payment and payment.status == 'SUCCESS' %}
+                    <div class="status-badge status-success">
+                        <i class="fas fa-check-circle me-2"></i> Document Verified
+                    </div>
+                {% else %}
+                    <div class="status-badge status-danger">
+                        <i class="fas fa-times-circle me-2"></i> Verification Failed
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="verification-details">
+                {% if payment and payment.status == 'SUCCESS' %}
+                    <div class="text-center mb-4">
+                        <i class="fas fa-certificate seal-icon"></i>
+                        <p class="text-muted small">This digital receipt is authenticated by our systems.</p>
+                    </div>
+
+                    <div class="amount-big">₹{{ "{:,}".format(payment.amount) }}</div>
+
+                    <div class="detail-row">
+                        <span class="detail-label">Receipt No</span>
+                        <span class="detail-value text-primary">{{ receipt_no }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Student Name</span>
+                        <span class="detail-value text-uppercase">{{ student.name }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Admission No</span>
+                        <span class="detail-value">{{ student.admission_no }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Category</span>
+                        <span class="detail-value">{{ payment.category }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Payment Mode</span>
+                        <span class="detail-value">{{ 'Cash' if payment.method == 'CASH_COUNTER' else 'Online' }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Date & Time</span>
+                        <span class="detail-value">{{ payment.created_at }}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Transaction ID</span>
+                        <span class="detail-value small">{{ payment.txn_id }}</span>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <p class="text-center fw-bold small text-muted mb-0">Institutions Detail</p>
+                        <p class="text-center small text-secondary mb-0">{{ inst.full_name if inst else 'JKK Munirajah Institutions' }}</p>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h4 class="fw-bold">Invalid Receipt</h4>
+                        <p class="text-muted">The receipt number <strong>{{ receipt_no }}</strong> was not found in our records or has been voided.</p>
+                        <a href="/" class="btn btn-primary rounded-pill px-4 mt-3">Back to Portal</a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="footer-text">
+                &copy; 2026 JKK Munirajah Institutions. All Rights Reserved. <br>
+                This is an automated verification system.
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

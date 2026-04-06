@@ -158,6 +158,44 @@ def reports():
     return render_template("admin/reports.html", today=date.today())
 
 
+@admin_bp.route("/reports/reconciliation", methods=["GET"])
+@admin_required
+def payment_reconciliation():
+    from models import Payment, Student
+    from extensions import db
+    from sqlalchemy import func, case
+
+    inst_id = session.get("institute_id")
+    # For simplicity, look at the last 30 days
+    start_date = (date.today() - timedelta(days=30)).isoformat()
+    
+    # Overall totals for this institute
+    totals = db.session.query(
+        func.coalesce(func.sum(case(((Payment.method == "CASH_COUNTER"), Payment.amount), else_=0)), 0).label("cash"),
+        func.coalesce(func.sum(case(((Payment.method != "CASH_COUNTER"), Payment.amount), else_=0)), 0).label("online")
+    ).join(Student, Student.id == Payment.student_id).filter(
+        Student.institute_id == inst_id,
+        Payment.status == "SUCCESS"
+    ).first()
+
+    # Daily variance for last 30 days
+    daily_stats = db.session.query(
+        func.date(Payment.created_at).label("day"),
+        func.coalesce(func.sum(case(((Payment.method == "CASH_COUNTER"), Payment.amount), else_=0)), 0).label("cash"),
+        func.coalesce(func.sum(case(((Payment.method != "CASH_COUNTER"), Payment.amount), else_=0)), 0).label("online")
+    ).join(Student, Student.id == Payment.student_id).filter(
+        Student.institute_id == inst_id,
+        Payment.status == "SUCCESS",
+        Payment.created_at >= start_date
+    ).group_by(func.date(Payment.created_at)).order_by(func.date(Payment.created_at).desc()).all()
+
+    return render_template(
+        "admin/reconciliation.html",
+        totals=totals,
+        daily_stats=daily_stats
+    )
+
+
 @admin_bp.route("/reports/daily-pdf", methods=["GET"])
 @admin_required
 def download_daily_report():

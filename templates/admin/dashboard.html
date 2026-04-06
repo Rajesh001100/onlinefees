@@ -16,7 +16,7 @@
       <select name="inst" class="form-select form-select-sm rounded-pill" style="max-width:250px;">
         <option value="">All Institutes</option>
         {% for i in institutes %}
-        <option value="{{ i.id }}" {% if selected_inst and (selected_inst | int)==i.id %}selected{% endif %}>{{
+        <option value="{{ i.id }}" {% if selected_inst and selected_inst == i.id %}selected{% endif %}>{{
           i.full_name }}</option>
         {% endfor %}
       </select>
@@ -104,6 +104,49 @@
 {% if is_founder and not selected_inst %}
 <!-- Founder Global Stats Section -->
 <div class="row mt-4 g-4">
+  <!-- Institute Collection Summary Table -->
+  <div class="col-12">
+    <div class="card glass border-0 shadow-sm">
+      <div class="card-header bg-transparent border-0 pt-4 px-4">
+        <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-table-list me-2"></i>Multi-Institute Summary</h5>
+        <small class="text-muted">High-level overview of all active branches</small>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="bg-light">
+              <tr>
+                <th class="ps-4">Institute</th>
+                <th class="text-center">Active Students</th>
+                <th class="text-end">Total Collected</th>
+                <th class="text-center">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for s in inst_summary %}
+              <tr>
+                <td class="ps-4">
+                  <div class="fw-bold">{{ s.name }}</div>
+                  <div class="text-muted small">{{ s.full_name }}</div>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-primary-soft text-primary px-3 rounded-pill">{{ s.students }}</span>
+                </td>
+                <td class="text-end fw-bold text-success">₹{{ "{:,}".format(s.collected|int) }}</td>
+                <td class="text-center">
+                  <a href="{{ url_for('admin.dashboard', inst=s.id) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                    Monitor <i class="fa-solid fa-arrow-right ms-1"></i>
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Institute Collection Comparison -->
   <div class="col-lg-6">
     <div class="card glass h-100 border-0 shadow-sm">

@@ -13,13 +13,22 @@
     <div class="collapse navbar-collapse" id="adminNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
         <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Dashboard</a>
+          <a class="nav-link" href="{{ url_for('admin.dashboard') }}">
+            {% if session.get('role') == 'FOUNDER' %}
+            <i class="fa-solid fa-crown me-1 text-warning"></i>Founder Dashboard
+            {% else %}
+            Dashboard
+            {% endif %}
+          </a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('admin.installments') }}">Installments</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('admin.scholarships') }}">Scholarships</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('admin.fee_plans') }}">Fee Plans</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('admin.upload_students') }}">Import</a>
@@ -38,6 +47,9 @@
         </a>
         <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('admin.daily_fees_summary') }}">
           <i class="fa-solid fa-chart-line me-1"></i> Summary
+        </a>
+        <a class="btn btn-sm btn-outline-primary ms-1" href="{{ url_for('admin.payment_reconciliation') }}">
+          <i class="fa-solid fa-scale-balanced me-1"></i> Reconciliation
         </a>
         <div class="vr mx-2 text-muted"></div>
         <a class="btn btn-sm btn-danger rounded-pill px-3" href="{{ url_for('admin.logout') }}">

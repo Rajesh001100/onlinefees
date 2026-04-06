@@ -1,0 +1,20 @@
+[
+    {
+        "username": "eng_admin",
+        "role": "ADMIN",
+        "active": 1,
+        "institute": "ENG"
+    },
+    {
+        "username": "agri_admin",
+        "role": "ADMIN",
+        "active": 1,
+        "institute": "AGRI"
+    },
+    {
+        "username": "pharm_admin",
+        "role": "ADMIN",
+        "active": 1,
+        "institute": "PHARM"
+    }
+]

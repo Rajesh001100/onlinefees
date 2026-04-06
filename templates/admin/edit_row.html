@@ -1,0 +1,65 @@
+{% extends "admin/admin_base.html" %}
+
+{% block admin_content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm border-0 glass">
+            <div class="card-header bg-transparent border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                <div>
+                    <h5 class="fw-bold mb-0 text-primary"><i class="fa-solid fa-pen-to-square me-2"></i>Edit Record</h5>
+                    <small class="text-muted">Table: <b class="text-dark">{{ table }}</b> | ID: <b class="text-dark">{{ row_id }}</b></small>
+                </div>
+                <a href="{{ url_for('admin.database_table_view', table=table) }}" class="btn btn-sm btn-light rounded-pill px-3">
+                    <i class="fa-solid fa-xmark me-1"></i>Cancel
+                </a>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    <div class="row g-3">
+                        {% for col in columns %}
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label small fw-bold text-uppercase text-muted">{{ col }}</label>
+                            
+                            {% if col == 'id' or col == 'created_at' %}
+                                <input type="text" class="form-control bg-light" value="{{ row[col] }}" disabled readonly>
+                                <div class="form-text small italic">Read-only field</div>
+                            {% elif col == 'institute_id' and session['role'] == 'ADMIN' %}
+                                <input type="text" name="{{ col }}" class="form-control bg-light" value="{{ row[col] }}" readonly>
+                                <div class="form-text small italic">Protected institute field</div>
+                            {% elif col in ['details', 'address', 'bio', 'note'] %}
+                                <textarea name="{{ col }}" class="form-control" rows="3">{{ row[col] }}</textarea>
+                            {% elif col in ['amount', 'tuition', 'hostel', 'exam', 'other', 'year', 'percentage'] %}
+                                <input type="number" name="{{ col }}" class="form-control" value="{{ row[col] }}" step="any">
+                            {% else %}
+                                <input type="text" name="{{ col }}" class="form-control" value="{{ row[col] }}">
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <hr class="my-4 opacity-10">
+                    
+                    <div class="d-flex justify-content-end gap-3">
+                        <a href="{{ url_for('admin.database_table_view', table=table) }}" class="btn btn-light rounded-pill px-4">
+                            Discard Changes
+                        </a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-5 shadow-sm">
+                            <i class="fa-solid fa-save me-2"></i>Apply Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        {% if table == 'users' %}
+        <div class="alert alert-warning mt-4 border-0 shadow-sm rounded-4 d-flex align-items-center">
+            <i class="fa-solid fa-triangle-exclamation fa-2x me-3"></i>
+            <div>
+                <h6 class="fw-bold mb-1">Security Warning</h6>
+                <small>Editing passwords directly in the 'users' table will save the plain text instead of a hash unless you know the encryption method. Use the specialized 'Reset Password' feature instead.</small>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
