@@ -15,8 +15,6 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 from config import Config
-from blueprints.student.routes import student_bp
-from blueprints.admin import admin_bp
 from utils.db import close_db
 
 from extensions import csrf, limiter, cache, db, migrate
@@ -27,21 +25,31 @@ def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
 
-    # If you want to confirm which DB Flask uses:
-    print("USING DATABASE_PATH =", app.config.get("DATABASE_PATH"))
-
+    # 1. Initialize Extensions
     csrf.init_app(app)
     limiter.init_app(app)
     cache.init_app(app)
     db.init_app(app)
     migrate.init_app(app, db)
     
-    import models
+    # 2. Lazy Import Models & Blueprints (Best Practice for Production)
+    with app.app_context():
+        import models
+        from blueprints.student.routes import student_bp
+        from blueprints.admin import admin_bp
+        
+        app.register_blueprint(student_bp)
+        app.register_blueprint(admin_bp)
+        
+        # ✅ Auto-initialize DB tables in Supabase/Render on startup
+        if os.getenv("DATABASE_URL"):
+            try:
+                db.create_all()
+                print("✅ Database tables verified/created on Supabase.")
+            except Exception as e:
+                print(f"⚠️ Database initialization notice: {e}")
 
-    app.register_blueprint(student_bp)
-    app.register_blueprint(admin_bp)
-
-    # ✅ close db connection after each request
+    # 3. Global App Config
     app.teardown_appcontext(close_db)
 
     @app.get("/")
@@ -71,6 +79,14 @@ def create_app(config_class=Config):
         inst = Institute.query.get(stu.institute_id) if stu else None
 
         return render_template("verify_public.html", receipt_no=receipt_no, payment=pay, student=stu, inst=inst)
+
+    # ✅ PRODUCTION ERROR LOGGING (for Render)
+    @app.errorhandler(500)
+    def handle_500(e):
+        import traceback
+        trace = traceback.format_exc()
+        print(f"\n❌ 🔥 [INTERNAL SERVER ERROR] Traceback:\n{trace}")
+        return "Internal Server Error", 500
 
     # ✅ Handle Render/Proxy headers for accurate Rate Limiting
     from werkzeug.middleware.proxy_fix import ProxyFix
