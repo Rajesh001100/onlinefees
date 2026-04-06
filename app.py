@@ -72,10 +72,15 @@ def create_app(config_class=Config):
 
         return render_template("verify_public.html", receipt_no=receipt_no, payment=pay, student=stu, inst=inst)
 
+    # ✅ Handle Render/Proxy headers for accurate Rate Limiting
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
     return app
 
 
 app = create_app()
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Local development runner
+    app.run(debug=True, port=5001)
